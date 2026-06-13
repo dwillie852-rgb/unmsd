@@ -47,7 +47,8 @@ a {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -329,6 +330,11 @@ h3 {
   border: 2px solid transparent;
   font-weight: 900;
   cursor: pointer;
+}
+
+.button:disabled {
+  cursor: progress;
+  opacity: 0.72;
 }
 
 .button-primary {
@@ -1154,9 +1160,9 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
-  min-height: 48px;
   border: 1px solid #cfcfcf;
   padding: 0 12px;
   color: var(--ink);
@@ -1164,8 +1170,21 @@ select {
   outline: none;
 }
 
+input,
+select {
+  min-height: 48px;
+}
+
+textarea {
+  min-height: 116px;
+  padding-block: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   border-color: var(--red);
   box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.12);
 }
@@ -1270,6 +1289,238 @@ input[type="range"] {
   line-height: 1.7;
 }
 
+.admin-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.42fr);
+  gap: clamp(28px, 6vw, 72px);
+  align-items: end;
+  padding: clamp(70px, 10vw, 122px) clamp(20px, 6vw, 76px) clamp(42px, 6vw, 70px);
+  color: var(--paper);
+  background: #171717;
+}
+
+.admin-hero .eyebrow {
+  color: #ff6a72;
+}
+
+.admin-hero p:not(.eyebrow) {
+  max-width: 740px;
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
+  line-height: 1.65;
+}
+
+.admin-auth {
+  display: grid;
+  gap: 14px;
+  padding: clamp(22px, 4vw, 32px);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.admin-auth .button {
+  width: 100%;
+}
+
+.admin-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+code {
+  padding: 2px 5px;
+  background: var(--soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.88em;
+}
+
+.admin-shell {
+  padding: clamp(52px, 7vw, 88px) clamp(20px, 6vw, 76px);
+  background: var(--paper);
+}
+
+.audit-shell {
+  border-top: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.admin-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 26px;
+}
+
+.admin-toolbar h2 {
+  font-size: clamp(2rem, 3.5vw, 3.4rem);
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin-bottom: 18px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.admin-stats article {
+  min-width: 0;
+  padding: 20px;
+  background: var(--paper);
+}
+
+.admin-stats strong {
+  display: block;
+  color: var(--red);
+  font-size: clamp(1.7rem, 3vw, 2.8rem);
+  line-height: 1;
+}
+
+.admin-stats span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.admin-status {
+  min-height: 24px;
+  margin: 0 0 18px;
+  color: var(--green);
+  font-weight: 850;
+}
+
+.admin-status.is-error {
+  color: var(--red-dark);
+}
+
+.application-list {
+  display: grid;
+  gap: 16px;
+}
+
+.application-card {
+  display: grid;
+  gap: 18px;
+  padding: clamp(20px, 4vw, 30px);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.application-card-header,
+.application-meta,
+.admin-controls {
+  display: grid;
+  gap: 14px;
+}
+
+.application-card-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.application-card-header p {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+
+.application-total {
+  text-align: right;
+}
+
+.application-total strong {
+  display: block;
+  font-size: clamp(1.5rem, 3vw, 2.3rem);
+  line-height: 1;
+}
+
+.application-total span,
+.application-meta span,
+.application-meta small,
+.family-note span,
+.audit-event span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.application-meta,
+.admin-controls {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.application-meta div {
+  min-width: 0;
+  padding: 14px;
+  background: var(--soft);
+}
+
+.application-meta strong {
+  display: block;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+
+.compact-costs {
+  margin-top: 0;
+}
+
+.family-note {
+  padding: 14px 16px;
+  border-left: 4px solid var(--red);
+  background: var(--soft);
+}
+
+.family-note p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.save-application {
+  width: min(240px, 100%);
+}
+
+.empty-state {
+  padding: 24px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  background: var(--paper);
+  font-weight: 800;
+}
+
+.audit-list {
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+
+.audit-event {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  background: var(--paper);
+}
+
+.audit-event time {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .cost-panel {
   display: grid;
   gap: 1px;
@@ -1319,6 +1570,10 @@ input[type="range"] {
   color: var(--green);
   font-weight: 850;
   line-height: 1.45;
+}
+
+.form-status.is-error {
+  color: var(--red-dark);
 }
 
 .accountability-section {
@@ -1435,6 +1690,7 @@ input[type="range"] {
   .emergency-desk,
   .page-hero,
   .leave-overview,
+  .admin-hero,
   .where-layout,
   .support-layout,
   .application-section,
@@ -1448,6 +1704,7 @@ input[type="range"] {
   }
 
   .timeline-grid,
+  .admin-stats,
   .cost-use-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1516,6 +1773,10 @@ input[type="range"] {
   .cost-use-grid,
   .faq-grid,
   .policy-content,
+  .admin-stats,
+  .application-card-header,
+  .application-meta,
+  .admin-controls,
   .accountability-grid,
   .form-grid {
     grid-template-columns: 1fr;
@@ -1540,6 +1801,16 @@ input[type="range"] {
   .page-hero {
     min-height: calc(100svh - 70px - 72px);
     padding-top: 68px;
+  }
+
+  .admin-toolbar,
+  .audit-event {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .application-total {
+    text-align: left;
   }
 
   .page-hero-panel {

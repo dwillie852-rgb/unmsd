@@ -115,6 +115,7 @@ filterButtons.forEach((button) => {
 
 if (form) {
   const textFields = form.querySelectorAll('input[required][type="text"], input[required][type="email"]');
+  const submitButton = form.querySelector('button[type="submit"]');
 
   textFields.forEach((field) => {
     field.addEventListener("input", () => {
@@ -122,8 +123,9 @@ if (form) {
     });
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    formStatus.textContent = "";
 
     textFields.forEach((field) => {
       field.setCustomValidity(field.value.trim() ? "" : "Please enter a real value.");
@@ -144,9 +146,59 @@ if (form) {
       return;
     }
 
-    const reference = `DWB-LR-${Math.floor(1000 + Math.random() * 9000)}`;
-    const total = money.format(calculateLeaveCost());
-    formStatus.textContent = `Reference ${reference} generated locally. Estimated replacement cover: ${total}. Connect the secure backend and payment workflow before accepting live applications.`;
+    const formData = new FormData(form);
+    const payload = {
+      applicant: String(formData.get("applicant") || ""),
+      email: String(formData.get("email") || ""),
+      doctor: String(formData.get("doctor") || ""),
+      station: String(formData.get("station") || ""),
+      startDate: String(formData.get("startDate") || ""),
+      familyNotes: String(formData.get("familyNotes") || ""),
+      role: role.value,
+      zone: zone.value,
+      days: Number(days.value),
+      travel: travel.checked,
+      consent: consent?.checked || false,
+      website: honeypot?.value || "",
+    };
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.dataset.originalHtml = submitButton.innerHTML;
+      submitButton.textContent = "Submitting...";
+    }
+
+    try {
+      const response = await fetch("/api/leave-applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const errors = result.errors || [result.error || "Application could not be submitted."];
+        formStatus.textContent = errors.join(" ");
+        formStatus.classList.add("is-error");
+        return;
+      }
+
+      const application = result.application;
+      formStatus.classList.remove("is-error");
+      formStatus.textContent = `Application ${application.reference} is in the operations queue. Estimated replacement cover: ${money.format(application.costs.total)}. Current status: ${application.status}.`;
+      form.reset();
+      calculateLeaveCost();
+    } catch {
+      formStatus.textContent = "The operations server could not be reached. Please try again when the connection is restored.";
+      formStatus.classList.add("is-error");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.innerHTML = submitButton.dataset.originalHtml || "Submit application";
+        window.lucide?.createIcons();
+      }
+    }
   });
 }
 

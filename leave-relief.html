@@ -215,8 +215,8 @@
           </div>
 
           <p class="form-note" id="form-note">
-            Prototype notice: this form currently generates a local review reference only. Production launch requires a
-            secure backend, payment processor, audit log, and operations dashboard.
+            Submissions are saved to the operations queue, assigned a reference, and reviewed for replacement coverage,
+            payment status, field movement, and handover readiness.
           </p>
 
           <div class="form-grid">
@@ -235,6 +235,14 @@
             <label>
               Field station
               <input name="station" type="text" placeholder="Mission, city, or desk" required />
+            </label>
+            <label>
+              Preferred start date
+              <input name="startDate" type="date" required />
+            </label>
+            <label>
+              Family notes
+              <textarea name="familyNotes" rows="4" maxlength="1200" placeholder="Urgent family context, minimum acceptable window, or travel constraints"></textarea>
             </label>
           </div>
 
@@ -278,8 +286,9 @@
           <label class="check-row consent-row">
             <input id="consent" name="consent" type="checkbox" required />
             <span>
-              I understand this is an operations review request, not an approved leave or payment confirmation, and I
-              agree to the <a href="privacy.html">privacy notice</a> and <a href="terms.html">terms</a>.
+              I understand this starts an operations review and does not approve travel until coverage, payment status,
+              security movement, and handover are cleared. I agree to the <a href="privacy.html">privacy notice</a> and
+              <a href="terms.html">terms</a>.
             </span>
           </label>
 
@@ -308,7 +317,7 @@
 
           <button class="button button-primary submit-button" type="submit">
             <i data-lucide="send"></i>
-            Submit for review
+            Submit application
           </button>
           <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
         </form>
@@ -362,6 +371,7 @@
         <a href="#apply">Apply</a>
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
+        <a href="admin.html">Admin</a>
       </div>
     </footer>
 
