@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Operations dashboard for Doctors Without Border leave relief applications." />
+    <meta name="description" content="Authenticated operations dashboard for Doctors Without Border leave relief applications." />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self';"
@@ -31,6 +31,7 @@
       <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
         <a href="index.html#home">Website</a>
         <a href="leave-relief.html">Leave relief</a>
+        <a href="status.html">Check status</a>
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
         <a href="admin.html" aria-current="page">Admin</a>
@@ -40,65 +41,81 @@
     <main>
       <section class="admin-hero">
         <div>
-          <p class="eyebrow">Operations review</p>
-          <h1>Leave relief dashboard.</h1>
-          <p>Review submitted requests, track coverage and payment status, and keep an audit trail of operational decisions.</p>
+          <p class="eyebrow">Authenticated operations</p>
+          <h1>Leave relief command center.</h1>
+          <p>
+            Securely review requests, move applications through coverage and payment checks, and keep every operational
+            decision visible in the audit trail.
+          </p>
+          <div class="admin-hero-pills" aria-label="Dashboard controls">
+            <span><i data-lucide="shield-check"></i> Session protected</span>
+            <span><i data-lucide="activity"></i> Live queue</span>
+            <span><i data-lucide="history"></i> Audit trail</span>
+          </div>
         </div>
-        <form class="admin-auth" id="admin-auth">
-          <label>
-            Admin token
-            <input id="admin-token" name="token" type="password" autocomplete="current-password" placeholder="Enter admin token" required />
-          </label>
-          <button class="button button-primary" type="submit">
-            <i data-lucide="refresh-cw"></i>
-            Load queue
-          </button>
-          <p class="admin-hint">Local development auto-fills the default token. Set <code>ADMIN_TOKEN</code> before real deployment.</p>
-        </form>
+
+        <aside class="admin-auth-card" id="admin-auth-card" aria-label="Admin authentication">
+          <form class="admin-auth" id="admin-auth">
+            <div class="admin-auth-heading">
+              <span class="auth-icon" aria-hidden="true"><i data-lucide="lock-keyhole"></i></span>
+              <div>
+                <p class="eyebrow">Sign in</p>
+                <h2>Operations access</h2>
+              </div>
+            </div>
+            <label>
+              Admin token
+              <input id="admin-token" name="token" type="password" autocomplete="current-password" placeholder="Enter admin token" required />
+            </label>
+            <button class="button button-primary" type="submit">
+              <i data-lucide="log-in"></i>
+              Sign in
+            </button>
+            <p class="admin-hint">
+              Local development uses <code>local-admin-token</code> unless <code>ADMIN_TOKEN</code> is set.
+            </p>
+          </form>
+
+          <div class="admin-session" id="admin-session" hidden>
+            <div class="admin-auth-heading">
+              <span class="auth-icon" aria-hidden="true"><i data-lucide="badge-check"></i></span>
+              <div>
+                <p class="eyebrow">Signed in</p>
+                <h2 id="session-user">Operations admin</h2>
+              </div>
+            </div>
+            <dl>
+              <div>
+                <dt>Access level</dt>
+                <dd id="session-role">Leave relief operations</dd>
+              </div>
+              <div>
+                <dt>Session expires</dt>
+                <dd id="session-expiry">-</dd>
+              </div>
+            </dl>
+            <button class="button button-light button-dark" id="admin-logout" type="button">
+              <i data-lucide="log-out"></i>
+              Sign out
+            </button>
+          </div>
+
+          <p class="admin-status auth-status" id="auth-status" role="status" aria-live="polite"></p>
+        </aside>
       </section>
 
-      <section class="admin-shell">
+      <section class="admin-shell admin-console" id="admin-console" hidden>
         <div class="admin-toolbar">
           <div>
-            <p class="eyebrow">Queue</p>
-            <h2>Applications</h2>
+            <p class="eyebrow">Operations queue</p>
+            <h2>Applications workbench</h2>
           </div>
-          <button class="button button-primary" id="refresh-applications" type="button">
-            <i data-lucide="rotate-cw"></i>
-            Refresh
-          </button>
-        </div>
-
-        <div class="queue-controls" aria-label="Queue filters">
-          <label>
-            Search
-            <input id="queue-search" type="search" placeholder="Reference, doctor, applicant, station" />
-          </label>
-          <label>
-            Review status
-            <select id="status-filter">
-              <option value="all">All statuses</option>
-              <option value="RECEIVED">Received</option>
-              <option value="COVERAGE_REVIEW">Coverage review</option>
-              <option value="COVERAGE_MATCHED">Coverage matched</option>
-              <option value="PAYMENT_PENDING">Payment pending</option>
-              <option value="APPROVED_FOR_TRAVEL">Approved for travel</option>
-              <option value="DECLINED">Declined</option>
-              <option value="REFUNDED">Refunded</option>
-              <option value="CLOSED">Closed</option>
-            </select>
-          </label>
-          <label>
-            Payment
-            <select id="payment-filter">
-              <option value="all">All payments</option>
-              <option value="NOT_REQUESTED">Not requested</option>
-              <option value="INVOICE_SENT">Invoice sent</option>
-              <option value="PAID">Paid</option>
-              <option value="REFUNDED">Refunded</option>
-              <option value="WAIVED">Waived</option>
-            </select>
-          </label>
+          <div class="toolbar-actions">
+            <button class="button button-light button-quiet" id="refresh-applications" type="button">
+              <i data-lucide="rotate-cw"></i>
+              Refresh
+            </button>
+          </div>
         </div>
 
         <div class="admin-stats" id="admin-stats" aria-live="polite">
@@ -108,33 +125,87 @@
           </article>
           <article>
             <strong>0</strong>
-            <span>Coverage review</span>
+            <span>Needs action</span>
           </article>
           <article>
             <strong>0</strong>
-            <span>Approved for travel</span>
+            <span>Travel ready</span>
           </article>
           <article>
             <strong>$0</strong>
-            <span>Estimated coverage total</span>
+            <span>Paid or estimated fees</span>
           </article>
         </div>
 
-        <p class="admin-status" id="admin-status" role="status" aria-live="polite"></p>
-        <div class="application-list" id="application-list">
-          <div class="empty-state">Loading the operations queue...</div>
-        </div>
-      </section>
+        <div class="admin-workspace">
+          <section class="queue-panel" aria-label="Applications queue">
+            <div class="queue-command-bar">
+              <div class="queue-tabs" role="tablist" aria-label="Quick filters">
+                <button class="chip active" type="button" data-quick-filter="all" aria-selected="true">All</button>
+                <button class="chip" type="button" data-quick-filter="action">Needs action</button>
+                <button class="chip" type="button" data-quick-filter="payment">Payment</button>
+                <button class="chip" type="button" data-quick-filter="travel">Travel ready</button>
+              </div>
+            </div>
 
-      <section class="admin-shell audit-shell">
-        <div class="admin-toolbar">
-          <div>
-            <p class="eyebrow">Audit trail</p>
-            <h2>Recent activity</h2>
-          </div>
-        </div>
-        <div class="audit-list" id="audit-list">
-          <div class="empty-state">Audit events will appear after the queue loads.</div>
+            <div class="queue-controls" aria-label="Queue filters">
+              <label>
+                Search
+                <input id="queue-search" type="search" placeholder="Reference, doctor, applicant, station" />
+              </label>
+              <label>
+                Review status
+                <select id="status-filter">
+                  <option value="all">All statuses</option>
+                  <option value="RECEIVED">Received</option>
+                  <option value="COVERAGE_REVIEW">Coverage review</option>
+                  <option value="COVERAGE_MATCHED">Coverage matched</option>
+                  <option value="PAYMENT_PENDING">Payment pending</option>
+                  <option value="APPROVED_FOR_TRAVEL">Approved for travel</option>
+                  <option value="DECLINED">Declined</option>
+                  <option value="REFUNDED">Refunded</option>
+                  <option value="CLOSED">Closed</option>
+                </select>
+              </label>
+              <label>
+                Payment
+                <select id="payment-filter">
+                  <option value="all">All payments</option>
+                  <option value="NOT_REQUESTED">Not requested</option>
+                  <option value="INVOICE_SENT">Invoice sent</option>
+                  <option value="PAID">Paid</option>
+                  <option value="REFUNDED">Refunded</option>
+                  <option value="WAIVED">Waived</option>
+                </select>
+              </label>
+              <label>
+                Sort
+                <select id="sort-filter">
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="startDate">Leave date</option>
+                  <option value="highestCost">Highest cost</option>
+                </select>
+              </label>
+            </div>
+
+            <p class="admin-status" id="admin-status" role="status" aria-live="polite"></p>
+            <div class="application-list" id="application-list">
+              <div class="empty-state">Sign in to load the operations queue.</div>
+            </div>
+          </section>
+
+          <aside class="audit-panel" aria-label="Recent audit activity">
+            <div class="admin-toolbar compact-toolbar">
+              <div>
+                <p class="eyebrow">Audit trail</p>
+                <h2>Recent activity</h2>
+              </div>
+            </div>
+            <div class="audit-list" id="audit-list">
+              <div class="empty-state">Audit events will appear after authentication.</div>
+            </div>
+          </aside>
         </div>
       </section>
     </main>
@@ -156,6 +227,7 @@
       <div class="footer-links">
         <a href="index.html#home">Website</a>
         <a href="leave-relief.html">Leave relief</a>
+        <a href="status.html">Check status</a>
         <a href="admin.html">Admin</a>
       </div>
     </footer>

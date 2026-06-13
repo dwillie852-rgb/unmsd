@@ -186,7 +186,7 @@ if (form) {
 
       const application = result.application;
       formStatus.classList.remove("is-error");
-      formStatus.textContent = `Application ${application.reference} is in the operations queue. Estimated replacement cover: ${money.format(application.costs.total)}. Current status: ${application.status}.`;
+      formStatus.innerHTML = `Application <strong>${application.reference}</strong> is in the operations queue. Estimated replacement cover: ${money.format(application.costs.total)}. <a href="status.html?reference=${encodeURIComponent(application.reference)}">Check status</a>.`;
       form.reset();
       calculateLeaveCost();
     } catch {

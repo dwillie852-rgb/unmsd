@@ -26,6 +26,8 @@ Set a real token before deployment:
 ADMIN_TOKEN="replace-with-a-long-secret" npm start
 ```
 
+Set `NODE_ENV=production` with a real `ADMIN_TOKEN` for production-like runs. The server refuses to start in production without an explicit admin token.
+
 ## What is included
 
 - Mission-led homepage modeled on medical humanitarian operations.
@@ -35,10 +37,11 @@ ADMIN_TOKEN="replace-with-a-long-secret" npm start
 - Field desk filter for conflict, displacement, and outbreak operations.
 - Staff-care area on the homepage that links to a full `leave-relief.html` programme page.
 - Dedicated leave relief page with process, eligibility, fee use, documents, FAQ, and a live replacement staffing cost estimate.
+- Public `status.html` lookup where applicants can check a leave request using the reference and applicant email.
 - Transparent fee breakdown for replacement coverage, handover, travel coordination, and operations reserve.
 - Privacy and terms pages that describe data controls, fee/refund rules, deployment requirements, and payment requirements.
 - Local `vendor/lucide.min.js` icon bundle so the site does not depend on a third-party script at runtime.
-- Node product server with `/api/leave-applications`, persistent JSON storage, server-side validation, admin status updates, payment-status tracking, and audit events.
+- Node product server with `/api/leave-applications`, persistent JSON storage, server-side validation, session-based admin auth, CSRF-protected admin updates, rate-limited status lookup, payment-status tracking, and audit events.
 
 ## Data storage
 

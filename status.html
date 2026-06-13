@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Check the status of a Doctors Without Border leave relief application." />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self';"
+    />
+    <title>Check Leave Status | Doctors Without Border</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html#home" aria-label="Doctors Without Border home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span>
+          <span></span>
+        </span>
+        <span>
+          <strong>Doctors Without Border</strong>
+          <small>Independent medical relief</small>
+        </span>
+      </a>
+
+      <button class="icon-button nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" title="Open menu">
+        <i data-lucide="menu"></i>
+      </button>
+
+      <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+        <a href="index.html#about">About</a>
+        <a href="index.html#work">What we do</a>
+        <a href="index.html#staff-care">Staff care</a>
+        <a href="leave-relief.html">Leave relief</a>
+        <a href="status.html" aria-current="page">Check status</a>
+        <a href="index.html#accountability">Accountability</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-hero status-page-hero">
+        <div class="page-hero-copy">
+          <p class="eyebrow">Leave relief status</p>
+          <h1>Check an application without calling the operations desk.</h1>
+          <p>
+            Use the review reference and applicant email from the leave relief submission. For privacy, this lookup only
+            shows high-level progress, payment state, dates, and the next operational step.
+          </p>
+        </div>
+        <div class="page-hero-panel" aria-label="Status lookup safeguards">
+          <div>
+            <strong>2</strong>
+            <span>details required to verify the request</span>
+          </div>
+          <div>
+            <strong>0</strong>
+            <span>family notes or internal notes exposed</span>
+          </div>
+          <div>
+            <strong>24/7</strong>
+            <span>self-service status access</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="status-section">
+        <form class="status-lookup-form" id="status-form" aria-label="Check leave relief application status">
+          <div class="form-header">
+            <div>
+              <p class="eyebrow">Status lookup</p>
+              <h2>Enter application details.</h2>
+            </div>
+            <span class="secure-pill">
+              <i data-lucide="shield-check"></i>
+              Privacy limited
+            </span>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              Application reference
+              <input id="status-reference" name="reference" type="text" autocomplete="off" placeholder="DWB-LR-20260613-ABC12345" required />
+            </label>
+            <label>
+              Applicant email
+              <input id="status-email" name="email" type="email" autocomplete="email" placeholder="name@example.org" required />
+            </label>
+          </div>
+
+          <button class="button button-primary submit-button" type="submit">
+            <i data-lucide="search-check"></i>
+            Check status
+          </button>
+          <p class="form-status" id="status-message" role="status" aria-live="polite"></p>
+        </form>
+
+        <section class="status-result" id="status-result" aria-live="polite">
+          <div class="empty-state">Application progress will appear here after verification.</div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <a class="brand footer-brand" href="index.html#home" aria-label="Doctors Without Border home">
+          <span class="brand-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+          </span>
+          <span>
+            <strong>Doctors Without Border</strong>
+            <small>Independent medical relief</small>
+          </span>
+        </a>
+        <p>Self-service leave relief status for applicants while operations protects privacy and field security.</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html#home">Website</a>
+        <a href="leave-relief.html">Leave relief</a>
+        <a href="status.html">Check status</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </div>
+    </footer>
+
+    <script src="vendor/lucide.min.js"></script>
+    <script src="script.js"></script>
+    <script src="status.js"></script>
+  </body>
+</html>

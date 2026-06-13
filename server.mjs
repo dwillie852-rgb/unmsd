@@ -2,13 +2,23 @@ import { createServer } from "node:http";
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
 import { createReadStream } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
-import { randomUUID } from "node:crypto";
+import { createHmac, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 
 const PORT = Number(process.env.PORT || 4173);
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "local-admin-token";
+const ADMIN_NAME = process.env.ADMIN_NAME || "Operations admin";
+const SESSION_COOKIE = "dwb_admin_session";
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const ROOT = resolve(".");
 const DATA_DIR = join(ROOT, "data");
 const DB_FILE = join(DATA_DIR, "applications.json");
+const adminSessions = new Map();
+const rateLimits = new Map();
+
+if (IS_PRODUCTION && !process.env.ADMIN_TOKEN) {
+  throw new Error("ADMIN_TOKEN must be set before running the admin dashboard in production.");
+}
 
 const rates = {
   medical: 245,
@@ -85,10 +95,11 @@ async function writeDb(db) {
   await rename(tmp, DB_FILE);
 }
 
-function sendJson(res, statusCode, payload) {
+function sendJson(res, statusCode, payload, headers = {}) {
   res.writeHead(statusCode, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
+    ...headers,
   });
   res.end(JSON.stringify(payload));
 }
@@ -114,14 +125,134 @@ function readJson(req) {
   });
 }
 
-function requireAdmin(req, res) {
-  const header = req.headers["x-admin-token"];
-  const token = Array.isArray(header) ? header[0] : header;
-  if (!token || token !== ADMIN_TOKEN) {
-    sendJson(res, 401, { error: "Admin token is missing or invalid." });
-    return false;
+function clientAddress(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (Array.isArray(forwarded)) return forwarded[0].split(",")[0].trim();
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return req.socket.remoteAddress || "unknown";
+}
+
+function consumeRateLimit(req, bucket, limit, windowMs) {
+  const now = Date.now();
+  const key = `${bucket}:${clientAddress(req)}`;
+  const current = rateLimits.get(key);
+  const entry = current && current.resetAt > now ? current : { count: 0, resetAt: now + windowMs };
+
+  entry.count += 1;
+  rateLimits.set(key, entry);
+
+  for (const [rateKey, value] of rateLimits.entries()) {
+    if (value.resetAt <= now) rateLimits.delete(rateKey);
   }
-  return true;
+
+  return {
+    allowed: entry.count <= limit,
+    retryAfter: Math.max(1, Math.ceil((entry.resetAt - now) / 1000)),
+  };
+}
+
+function clearRateLimit(req, bucket) {
+  rateLimits.delete(`${bucket}:${clientAddress(req)}`);
+}
+
+function randomToken(bytes = 32) {
+  return randomBytes(bytes).toString("base64url");
+}
+
+function safeEquals(left, right) {
+  const normalizeSecret = (value) => createHmac("sha256", "dwb-constant-compare").update(String(value || "")).digest();
+  return timingSafeEqual(normalizeSecret(left), normalizeSecret(right));
+}
+
+function parseCookies(req) {
+  const header = req.headers.cookie || "";
+  return Object.fromEntries(
+    header
+      .split(";")
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => {
+        const separator = part.indexOf("=");
+        if (separator === -1) return [decodeURIComponent(part), ""];
+        return [decodeURIComponent(part.slice(0, separator)), decodeURIComponent(part.slice(separator + 1))];
+      }),
+  );
+}
+
+function isSecureRequest(req) {
+  return Boolean(req.socket.encrypted || req.headers["x-forwarded-proto"] === "https");
+}
+
+function sessionCookie(req, value, maxAgeSeconds) {
+  const secure = isSecureRequest(req) ? "; Secure" : "";
+  return `${SESSION_COOKIE}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAgeSeconds}${secure}`;
+}
+
+function clearExpiredSessions() {
+  const now = Date.now();
+  for (const [id, session] of adminSessions.entries()) {
+    if (session.expiresAt <= now) {
+      adminSessions.delete(id);
+    }
+  }
+}
+
+function createAdminSession() {
+  clearExpiredSessions();
+  const id = randomToken();
+  const session = {
+    id,
+    csrfToken: randomToken(),
+    name: ADMIN_NAME,
+    role: "Leave relief operations",
+    expiresAt: Date.now() + SESSION_TTL_MS,
+  };
+  adminSessions.set(id, session);
+  return session;
+}
+
+function getAdminSession(req) {
+  clearExpiredSessions();
+  const sessionId = parseCookies(req)[SESSION_COOKIE];
+  if (!sessionId) return null;
+
+  const session = adminSessions.get(sessionId);
+  if (!session || session.expiresAt <= Date.now()) {
+    if (session) adminSessions.delete(sessionId);
+    return null;
+  }
+
+  return session;
+}
+
+function sessionPayload(session) {
+  return {
+    authenticated: true,
+    csrfToken: session.csrfToken,
+    admin: {
+      name: session.name,
+      role: session.role,
+    },
+    expiresAt: new Date(session.expiresAt).toISOString(),
+  };
+}
+
+function requireAdmin(req, res, { requireCsrf = true } = {}) {
+  const session = getAdminSession(req);
+  if (!session) {
+    sendJson(res, 401, { error: "Sign in to the operations dashboard first." });
+    return null;
+  }
+
+  const csrfHeader = req.headers["x-csrf-token"];
+  const csrfToken = Array.isArray(csrfHeader) ? csrfHeader[0] : csrfHeader;
+  if (requireCsrf && !safeEquals(csrfToken, session.csrfToken)) {
+    sendJson(res, 403, { error: "The admin session could not be verified. Please sign in again." });
+    return null;
+  }
+
+  session.expiresAt = Date.now() + SESSION_TTL_MS;
+  return session;
 }
 
 function asTrimmedString(value) {
@@ -197,6 +328,41 @@ function publicApplication(application) {
   };
 }
 
+function statusNextStep(status, paymentStatus) {
+  if (status === "DECLINED") return "Operations could not clear the requested leave window. The team will share revised dates or refund guidance.";
+  if (status === "REFUNDED") return "The refund pathway is active or complete for this request.";
+  if (status === "CLOSED") return "This leave relief request is closed.";
+  if (status === "APPROVED_FOR_TRAVEL") return "Leave is cleared for travel. Follow the movement and handover instructions from operations.";
+  if (paymentStatus === "INVOICE_SENT") return "Complete the invoice payment so operations can finalize replacement cover.";
+  if (paymentStatus === "PAID" && status === "COVERAGE_MATCHED") return "Replacement cover is matched. Operations is finalizing movement, handover, and travel clearance.";
+  if (status === "PAYMENT_PENDING") return "Coverage planning is underway and payment confirmation is needed before travel clearance.";
+  if (status === "COVERAGE_MATCHED") return "A replacement match is available. Operations is confirming payment and handover readiness.";
+  if (status === "COVERAGE_REVIEW") return "The mission desk is checking caseload, safety, replacement fit, and handover requirements.";
+  return "Your request has been received. Operations will review the mission details and contact the applicant.";
+}
+
+function publicStatus(application) {
+  const stepOrder = ["RECEIVED", "COVERAGE_REVIEW", "COVERAGE_MATCHED", "PAYMENT_PENDING", "APPROVED_FOR_TRAVEL"];
+  const currentIndex = stepOrder.includes(application.status) ? stepOrder.indexOf(application.status) : -1;
+
+  return {
+    reference: application.reference,
+    status: application.status,
+    paymentStatus: application.paymentStatus,
+    createdAt: application.createdAt,
+    updatedAt: application.updatedAt,
+    startDate: application.startDate,
+    days: application.days,
+    estimatedCost: application.costs?.total || 0,
+    nextStep: statusNextStep(application.status, application.paymentStatus),
+    timeline: stepOrder.map((step, index) => ({
+      key: step,
+      complete: currentIndex > index || application.status === "APPROVED_FOR_TRAVEL",
+      current: application.status === step,
+    })),
+  };
+}
+
 function makeReference() {
   const date = new Date().toISOString().slice(0, 10).replaceAll("-", "");
   const suffix = randomUUID().slice(0, 8).toUpperCase();
@@ -260,7 +426,8 @@ async function listApplications(req, res) {
 }
 
 async function updateApplication(req, res, id) {
-  if (!requireAdmin(req, res)) return;
+  const session = requireAdmin(req, res);
+  if (!session) return;
 
   try {
     const payload = await readJson(req);
@@ -303,7 +470,7 @@ async function updateApplication(req, res, id) {
       reference: application.reference,
       event: "APPLICATION_UPDATED",
       at: application.updatedAt,
-      actor: "admin-dashboard",
+      actor: session.name,
       details: {
         before,
         after: {
@@ -319,6 +486,86 @@ async function updateApplication(req, res, id) {
   } catch (error) {
     sendJson(res, 400, { error: error.message || "Application could not be updated." });
   }
+}
+
+async function getApplicationStatus(req, res) {
+  const rate = consumeRateLimit(req, "status-lookup", 30, 10 * 60 * 1000);
+  if (!rate.allowed) {
+    sendJson(res, 429, { error: "Too many status checks. Please try again shortly." }, { "Retry-After": String(rate.retryAfter) });
+    return;
+  }
+
+  try {
+    const payload = await readJson(req);
+    const reference = asTrimmedString(payload.reference).toUpperCase();
+    const email = asTrimmedString(payload.email).toLowerCase();
+
+    if (!reference || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      sendJson(res, 400, { error: "Enter the application reference and applicant email address." });
+      return;
+    }
+
+    const db = await readDb();
+    const application = db.applications.find(
+      (item) => item.reference.toUpperCase() === reference && item.email.toLowerCase() === email,
+    );
+
+    if (!application) {
+      sendJson(res, 404, { error: "No leave relief request matched that reference and email address." });
+      return;
+    }
+
+    sendJson(res, 200, { application: publicStatus(application) });
+  } catch (error) {
+    sendJson(res, 400, { error: error.message || "Status could not be checked." });
+  }
+}
+
+async function adminLogin(req, res) {
+  const rate = consumeRateLimit(req, "admin-login", 8, 15 * 60 * 1000);
+  if (!rate.allowed) {
+    sendJson(res, 429, { error: "Too many sign-in attempts. Please wait before trying again." }, { "Retry-After": String(rate.retryAfter) });
+    return;
+  }
+
+  try {
+    const payload = await readJson(req);
+    const token = asTrimmedString(payload.token);
+
+    if (!token || !safeEquals(token, ADMIN_TOKEN)) {
+      sendJson(res, 401, { error: "Admin credentials are invalid." });
+      return;
+    }
+
+    const session = createAdminSession();
+    clearRateLimit(req, "admin-login");
+    sendJson(res, 200, sessionPayload(session), {
+      "Set-Cookie": sessionCookie(req, session.id, Math.floor(SESSION_TTL_MS / 1000)),
+    });
+  } catch (error) {
+    sendJson(res, 400, { error: error.message || "Sign in failed." });
+  }
+}
+
+async function adminLogout(req, res) {
+  const sessionId = parseCookies(req)[SESSION_COOKIE];
+  if (sessionId) {
+    adminSessions.delete(sessionId);
+  }
+
+  sendJson(res, 200, { ok: true }, {
+    "Set-Cookie": sessionCookie(req, "", 0),
+  });
+}
+
+function adminSession(req, res) {
+  const session = getAdminSession(req);
+  if (!session) {
+    sendJson(res, 401, { authenticated: false });
+    return;
+  }
+
+  sendJson(res, 200, sessionPayload(session));
 }
 
 function serveStatic(req, res) {
@@ -361,6 +608,26 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/api/leave-applications/status") {
+    await getApplicationStatus(req, res);
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/admin/login") {
+    await adminLogin(req, res);
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/admin/logout") {
+    await adminLogout(req, res);
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/admin/session") {
+    adminSession(req, res);
+    return;
+  }
+
   if (req.method === "GET" && url.pathname === "/api/leave-applications") {
     await listApplications(req, res);
     return;
@@ -383,5 +650,5 @@ const server = createServer(async (req, res) => {
 await ensureDb();
 server.listen(PORT, () => {
   console.log(`Doctors Without Border product server running at http://127.0.0.1:${PORT}`);
-  console.log(`Admin dashboard token: ${ADMIN_TOKEN}`);
+  console.log(process.env.ADMIN_TOKEN ? "Admin dashboard auth: ADMIN_TOKEN is set." : "Admin dashboard token: local-admin-token (development default).");
 });
