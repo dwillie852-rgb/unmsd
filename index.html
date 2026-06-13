@@ -7,6 +7,10 @@
       name="description"
       content="Doctors Without Border delivers independent medical care in conflict zones, displacement sites, epidemics, and underserved communities."
     />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self';"
+    />
     <title>Doctors Without Border | Independent Medical Relief</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -467,10 +471,12 @@
         <a href="index.html#support">Support</a>
         <a href="index.html#staff-care">Staff care</a>
         <a href="leave-relief.html">Leave relief</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
       </div>
     </footer>
 
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="vendor/lucide.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

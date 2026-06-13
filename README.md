@@ -22,6 +22,8 @@ Then visit `http://localhost:4173`.
 - Staff-care area on the homepage that links to a full `leave-relief.html` programme page.
 - Dedicated leave relief page with process, eligibility, fee use, documents, FAQ, and a live replacement staffing cost estimate.
 - Transparent fee breakdown for replacement coverage, handover, travel coordination, and operations reserve.
+- Privacy and terms pages that describe prototype limits, production data controls, fee/refund rules, and payment requirements.
+- Local `vendor/lucide.min.js` icon bundle so the site does not depend on a third-party script at runtime.
 
 ## References and asset notes
 

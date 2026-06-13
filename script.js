@@ -30,6 +30,8 @@ const reserveCost = document.querySelector("#reserve-cost");
 const totalCost = document.querySelector("#total-cost");
 const form = document.querySelector("#apply");
 const formStatus = document.querySelector("#form-status");
+const honeypot = document.querySelector("#website");
+const consent = document.querySelector("#consent");
 const navToggle = document.querySelector(".nav-toggle");
 const siteNav = document.querySelector("#site-nav");
 const filterButtons = document.querySelectorAll("[data-region-filter]");
@@ -112,17 +114,39 @@ filterButtons.forEach((button) => {
 });
 
 if (form) {
+  const textFields = form.querySelectorAll('input[required][type="text"], input[required][type="email"]');
+
+  textFields.forEach((field) => {
+    field.addEventListener("input", () => {
+      field.setCustomValidity(field.value.trim() ? "" : "Please enter a real value.");
+    });
+  });
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+
+    textFields.forEach((field) => {
+      field.setCustomValidity(field.value.trim() ? "" : "Please enter a real value.");
+    });
 
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     }
 
+    if (honeypot?.value.trim()) {
+      formStatus.textContent = "This request could not be processed.";
+      return;
+    }
+
+    if (consent && !consent.checked) {
+      consent.reportValidity();
+      return;
+    }
+
     const reference = `DWB-LR-${Math.floor(1000 + Math.random() * 9000)}`;
     const total = money.format(calculateLeaveCost());
-    formStatus.textContent = `Application ${reference} is ready for operations review. Estimated replacement cover: ${total}.`;
+    formStatus.textContent = `Reference ${reference} generated locally. Estimated replacement cover: ${total}. Connect the secure backend and payment workflow before accepting live applications.`;
   });
 }
 

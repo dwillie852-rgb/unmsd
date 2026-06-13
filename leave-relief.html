@@ -7,6 +7,10 @@
       name="description"
       content="Leave relief programme for families of Doctors Without Border field doctors, including replacement coverage, eligibility, costs, and application intake."
     />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self';"
+    />
     <title>Leave Relief | Doctors Without Border</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -210,6 +214,11 @@
             </span>
           </div>
 
+          <p class="form-note" id="form-note">
+            Prototype notice: this form currently generates a local review reference only. Production launch requires a
+            secure backend, payment processor, audit log, and operations dashboard.
+          </p>
+
           <div class="form-grid">
             <label>
               Applicant name
@@ -259,6 +268,19 @@
           <label class="check-row">
             <input id="travel" name="travel" type="checkbox" checked />
             <span>Include family travel coordination support</span>
+          </label>
+
+          <label class="visually-hidden" for="website">
+            Website
+            <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+          </label>
+
+          <label class="check-row consent-row">
+            <input id="consent" name="consent" type="checkbox" required />
+            <span>
+              I understand this is an operations review request, not an approved leave or payment confirmation, and I
+              agree to the <a href="privacy.html">privacy notice</a> and <a href="terms.html">terms</a>.
+            </span>
           </label>
 
           <div class="cost-panel" aria-live="polite">
@@ -338,10 +360,12 @@
         <a href="index.html#staff-care">Staff care</a>
         <a href="leave-relief.html">Leave relief</a>
         <a href="#apply">Apply</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
       </div>
     </footer>
 
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="vendor/lucide.min.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
