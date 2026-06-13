@@ -53,7 +53,7 @@
             <i data-lucide="refresh-cw"></i>
             Load queue
           </button>
-          <p class="admin-hint">Local default token: <code>local-admin-token</code>. Set <code>ADMIN_TOKEN</code> before real deployment.</p>
+          <p class="admin-hint">Local development auto-fills the default token. Set <code>ADMIN_TOKEN</code> before real deployment.</p>
         </form>
       </section>
 
@@ -67,6 +67,38 @@
             <i data-lucide="rotate-cw"></i>
             Refresh
           </button>
+        </div>
+
+        <div class="queue-controls" aria-label="Queue filters">
+          <label>
+            Search
+            <input id="queue-search" type="search" placeholder="Reference, doctor, applicant, station" />
+          </label>
+          <label>
+            Review status
+            <select id="status-filter">
+              <option value="all">All statuses</option>
+              <option value="RECEIVED">Received</option>
+              <option value="COVERAGE_REVIEW">Coverage review</option>
+              <option value="COVERAGE_MATCHED">Coverage matched</option>
+              <option value="PAYMENT_PENDING">Payment pending</option>
+              <option value="APPROVED_FOR_TRAVEL">Approved for travel</option>
+              <option value="DECLINED">Declined</option>
+              <option value="REFUNDED">Refunded</option>
+              <option value="CLOSED">Closed</option>
+            </select>
+          </label>
+          <label>
+            Payment
+            <select id="payment-filter">
+              <option value="all">All payments</option>
+              <option value="NOT_REQUESTED">Not requested</option>
+              <option value="INVOICE_SENT">Invoice sent</option>
+              <option value="PAID">Paid</option>
+              <option value="REFUNDED">Refunded</option>
+              <option value="WAIVED">Waived</option>
+            </select>
+          </label>
         </div>
 
         <div class="admin-stats" id="admin-stats" aria-live="polite">
@@ -89,7 +121,9 @@
         </div>
 
         <p class="admin-status" id="admin-status" role="status" aria-live="polite"></p>
-        <div class="application-list" id="application-list"></div>
+        <div class="application-list" id="application-list">
+          <div class="empty-state">Loading the operations queue...</div>
+        </div>
       </section>
 
       <section class="admin-shell audit-shell">
@@ -99,7 +133,9 @@
             <h2>Recent activity</h2>
           </div>
         </div>
-        <div class="audit-list" id="audit-list"></div>
+        <div class="audit-list" id="audit-list">
+          <div class="empty-state">Audit events will appear after the queue loads.</div>
+        </div>
       </section>
     </main>
 

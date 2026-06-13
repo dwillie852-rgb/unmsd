@@ -1368,6 +1368,16 @@ code {
   border: 1px solid var(--line);
 }
 
+.queue-controls {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(180px, 0.35fr) minmax(180px, 0.35fr);
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+}
+
 .admin-stats article {
   min-width: 0;
   padding: 20px;
@@ -1429,6 +1439,17 @@ code {
 .application-card-header p {
   margin: 10px 0 0;
   color: var(--muted);
+}
+
+.application-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.application-badges .status {
+  margin-bottom: 0;
 }
 
 .application-total {
@@ -1774,6 +1795,7 @@ code {
   .faq-grid,
   .policy-content,
   .admin-stats,
+  .queue-controls,
   .application-card-header,
   .application-meta,
   .admin-controls,

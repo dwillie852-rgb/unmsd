@@ -24,9 +24,16 @@ const adminStatus = document.querySelector("#admin-status");
 const applicationList = document.querySelector("#application-list");
 const auditList = document.querySelector("#audit-list");
 const adminStats = document.querySelector("#admin-stats");
+const queueSearch = document.querySelector("#queue-search");
+const statusFilter = document.querySelector("#status-filter");
+const paymentFilter = document.querySelector("#payment-filter");
+
+let cachedApplications = [];
+let cachedAudit = [];
 
 if (adminTokenInput) {
-  adminTokenInput.value = localStorage.getItem("dwb-admin-token") || "";
+  const isLocal = ["127.0.0.1", "localhost", "::1"].includes(window.location.hostname);
+  adminTokenInput.value = localStorage.getItem("dwb-admin-token") || (isLocal ? "local-admin-token" : "");
 }
 
 function escapeHtml(value) {
@@ -51,6 +58,44 @@ function optionHtml(options, selected) {
 function setAdminStatus(message, isError = false) {
   adminStatus.textContent = message;
   adminStatus.classList.toggle("is-error", isError);
+}
+
+function statusClass(status) {
+  if (status === "APPROVED_FOR_TRAVEL" || status === "COVERAGE_MATCHED") return "status-teal";
+  if (status === "DECLINED" || status === "REFUNDED") return "status-gold";
+  return "status-red";
+}
+
+function getFilteredApplications() {
+  const query = queueSearch.value.trim().toLowerCase();
+  const selectedStatus = statusFilter.value;
+  const selectedPayment = paymentFilter.value;
+
+  return cachedApplications.filter((application) => {
+    const haystack = [
+      application.reference,
+      application.applicant,
+      application.email,
+      application.doctor,
+      application.station,
+      application.roleLabel,
+      application.zoneLabel,
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    const matchesQuery = !query || haystack.includes(query);
+    const matchesStatus = selectedStatus === "all" || application.status === selectedStatus;
+    const matchesPayment = selectedPayment === "all" || application.paymentStatus === selectedPayment;
+
+    return matchesQuery && matchesStatus && matchesPayment;
+  });
+}
+
+function rerenderQueue() {
+  renderStats(cachedApplications);
+  renderApplications(getFilteredApplications(), cachedApplications.length);
+  renderAudit(cachedAudit);
 }
 
 async function adminFetch(path, options = {}) {
@@ -103,9 +148,14 @@ function renderStats(applications) {
   `;
 }
 
-function renderApplications(applications) {
-  if (!applications.length) {
+function renderApplications(applications, totalApplications = applications.length) {
+  if (!totalApplications) {
     applicationList.innerHTML = `<div class="empty-state">No leave relief applications have been submitted yet.</div>`;
+    return;
+  }
+
+  if (!applications.length) {
+    applicationList.innerHTML = `<div class="empty-state">No applications match the current filters.</div>`;
     return;
   }
 
@@ -118,6 +168,10 @@ function renderApplications(applications) {
               <span class="status status-red">${escapeHtml(application.reference)}</span>
               <h3>${escapeHtml(application.doctor)}</h3>
               <p>${escapeHtml(application.roleLabel)} | ${escapeHtml(application.station)}</p>
+              <div class="application-badges">
+                <span class="status ${statusClass(application.status)}">${formatStatus(application.status)}</span>
+                <span class="status status-teal">${formatStatus(application.paymentStatus)}</span>
+              </div>
             </div>
             <div class="application-total">
               <strong>${adminMoney.format(application.costs.total)}</strong>
@@ -209,9 +263,9 @@ function renderAudit(audit) {
 async function loadApplications() {
   setAdminStatus("Loading operations queue...");
   const result = await adminFetch("/api/leave-applications");
-  renderStats(result.applications);
-  renderApplications(result.applications);
-  renderAudit(result.audit);
+  cachedApplications = result.applications;
+  cachedAudit = result.audit;
+  rerenderQueue();
   setAdminStatus(`Loaded ${result.applications.length} application${result.applications.length === 1 ? "" : "s"}.`);
 }
 
@@ -222,6 +276,24 @@ adminAuthForm?.addEventListener("submit", async (event) => {
   } catch (error) {
     setAdminStatus(error.message, true);
   }
+});
+
+[queueSearch, statusFilter, paymentFilter].forEach((control) => {
+  control?.addEventListener("input", rerenderQueue);
+  control?.addEventListener("change", rerenderQueue);
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  if (!adminTokenInput?.value.trim()) {
+    applicationList.innerHTML = `<div class="empty-state">Enter the admin token to load the operations queue.</div>`;
+    auditList.innerHTML = `<div class="empty-state">Audit events will appear after authentication.</div>`;
+    return;
+  }
+
+  loadApplications().catch((error) => {
+    setAdminStatus(error.message, true);
+    applicationList.innerHTML = `<div class="empty-state">Could not load the queue. Check the admin token and server.</div>`;
+  });
 });
 
 refreshButton?.addEventListener("click", async () => {
