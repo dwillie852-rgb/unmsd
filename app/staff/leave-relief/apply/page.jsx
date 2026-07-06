@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, ArrowRight, ArrowLeft, Send } from 'lucide-react';
@@ -35,6 +35,16 @@ export default function Apply() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successRef, setSuccessRef] = useState(null);
+  const [feeSettings, setFeeSettings] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/fee-settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.feeSettings) setFeeSettings(data.feeSettings);
+      })
+      .catch(err => console.error("Failed to load fee settings:", err));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,12 +73,17 @@ export default function Apply() {
     }
   };
 
-  const costMultipliers = { standard: 1, hardship: 1.2, critical: 1.5 };
-  const dailyRate = 450;
-  const coverageCost = formData.days * dailyRate * costMultipliers[formData.zone];
-  const handoverCost = 1500;
-  const travelCost = formData.travel ? 1200 : 0;
-  const reserveCost = (coverageCost + handoverCost + travelCost) * 0.15;
+  // Fallback defaults while loading
+  const rates = feeSettings?.roleRates || { medical: 245, emergency: 380, surgical: 520, maternal: 320, mental: 290 };
+  const multipliers = feeSettings?.zoneMultipliers || { standard: 1, hardship: 1.18, critical: 1.35 };
+  const handoverRates = feeSettings?.handover || { default: 650, surgical: 900 };
+  const travelCoord = feeSettings?.travelCoordination ?? 480;
+  const reservePercent = feeSettings?.reservePercent ?? 8;
+
+  const coverageCost = Math.round((rates[formData.role] || 245) * (multipliers[formData.zone] || 1) * formData.days);
+  const handoverCost = formData.role === 'surgical' ? handoverRates.surgical : handoverRates.default;
+  const travelCost = formData.travel ? travelCoord : 0;
+  const reserveCost = Math.round((coverageCost + handoverCost + travelCost) * (reservePercent / 100));
   const total = coverageCost + handoverCost + travelCost + reserveCost;
 
   const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);

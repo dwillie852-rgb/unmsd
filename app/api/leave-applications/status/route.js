@@ -1,9 +1,28 @@
 import { NextResponse } from "next/server";
 import { readDb } from "../../../../lib/db.js";
 import { consumeRateLimit, safeEquals } from "../../../../lib/auth.js";
-import { asTrimmedString } from "../../../../lib/validation.js";
+import { asTrimmedString, normalizePaymentSettings } from "../../../../lib/validation.js";
 
-function publicPaymentRequest(paymentRequest) {
+function publicPaymentMethods(settings) {
+  const normalized = normalizePaymentSettings(settings);
+  return Object.entries(normalized.methods)
+    .filter(([, method]) => method.enabled)
+    .map(([key, method]) => {
+      if (key === "crypto") {
+        return {
+          key, label: method.label, settlement: method.settlement, instructions: method.instructions,
+          assets: method.assets.map((asset) => ({ asset: asTrimmedString(asset.asset), network: asTrimmedString(asset.network), address: asTrimmedString(asset.address) })),
+        };
+      }
+      return {
+        key, label: method.label, provider: method.provider, checkoutUrl: method.checkoutUrl,
+        accountName: method.accountName, bankName: method.bankName, accountNumber: method.accountNumber,
+        iban: method.iban, swift: method.swift, providers: method.providers, contact: method.contact, instructions: method.instructions,
+      };
+    });
+}
+
+function publicPaymentRequest(paymentRequest, paymentSettings) {
   if (!paymentRequest) return null;
   return {
     id: paymentRequest.id,
@@ -14,7 +33,7 @@ function publicPaymentRequest(paymentRequest) {
     issuedAt: paymentRequest.issuedAt,
     expiresAt: paymentRequest.expiresAt,
     paidAt: paymentRequest.paidAt || null,
-    methods: Array.isArray(paymentRequest.methods) ? paymentRequest.methods : [],
+    methods: publicPaymentMethods(paymentSettings),
     settlementNote: paymentRequest.settlementNote || "",
     proof: paymentRequest.proof || null,
   };
@@ -33,7 +52,7 @@ function statusNextStep(status, paymentStatus) {
   return "Your request has been received. Operations will review the mission details and contact the applicant.";
 }
 
-function publicStatus(application) {
+function publicStatus(application, paymentSettings) {
   const stepOrder = ["RECEIVED", "COVERAGE_REVIEW", "COVERAGE_MATCHED", "PAYMENT_PENDING", "APPROVED_FOR_TRAVEL"];
   const currentIndex = stepOrder.includes(application.status) ? stepOrder.indexOf(application.status) : -1;
 
@@ -47,7 +66,7 @@ function publicStatus(application) {
     days: application.days,
     estimatedCost: application.costs?.total || 0,
     costs: application.costs || null,
-    paymentRequest: publicPaymentRequest(application.paymentRequest),
+    paymentRequest: publicPaymentRequest(application.paymentRequest, paymentSettings),
     nextStep: statusNextStep(application.status, application.paymentStatus),
     timeline: stepOrder.map((step, index) => ({
       key: step,
@@ -84,7 +103,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "No leave relief request matched that reference and email address." }, { status: 404 });
     }
 
-    return NextResponse.json({ application: publicStatus(application) });
+    return NextResponse.json({ application: publicStatus(application, db.paymentSettings) });
   } catch (error) {
     return NextResponse.json({ error: error.message || "Status could not be checked." }, { status: 400 });
   }
