@@ -231,7 +231,7 @@ function PaymentRequestPanel({ application }) {
           <span>Payment request</span>
           <strong>No payment request issued</strong>
         </div>
-        <p>Issue a request after coverage review so the family can choose card, bank, mobile money, or crypto settlement.</p>
+        <p>Issue a request after coverage review so the family can choose their preferred settlement method.</p>
       </div>
     );
   }

@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
-import { readDb, writeDb } from "../../../../lib/db.js";
+import { readDb, writeDb, supabase } from "../../../../lib/db.js";
 import { consumeRateLimit, safeEquals } from "../../../../lib/auth.js";
 import { asTrimmedString } from "../../../../lib/validation.js";
 import { DATA_DIR } from "../../../../lib/config.js";
 import { randomUUID } from "node:crypto";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
+import { NextResponse } from "next/server";
 
 export async function POST(req) {
   const rate = consumeRateLimit(req, "upload-proof", 10, 10 * 60 * 1000);
@@ -55,19 +55,28 @@ export async function POST(req) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
-    // Determine extension
     let ext = ".jpg";
     if (file.type === "image/png") ext = ".png";
     if (file.type === "application/pdf") ext = ".pdf";
     
     const fileName = `${application.reference}-proof-${randomUUID()}${ext}`;
-    const uploadDir = path.join(DATA_DIR, "uploads");
-    await mkdir(uploadDir, { recursive: true });
-    
-    const filePath = path.join(uploadDir, fileName);
-    await writeFile(filePath, buffer);
-    
-    const fileUrl = `/api/admin/uploads?file=${encodeURIComponent(fileName)}`;
+    let fileUrl = "";
+
+    if (supabase) {
+      const { data, error } = await supabase.storage.from("proofs").upload(fileName, buffer, {
+        contentType: file.type,
+        upsert: false
+      });
+      if (error) throw new Error("Failed to upload file to cloud storage.");
+      const { data: publicData } = supabase.storage.from("proofs").getPublicUrl(fileName);
+      fileUrl = publicData.publicUrl;
+    } else {
+      const uploadDir = path.join(DATA_DIR, "uploads");
+      await mkdir(uploadDir, { recursive: true });
+      const filePath = path.join(uploadDir, fileName);
+      await writeFile(filePath, buffer);
+      fileUrl = `/api/admin/uploads?file=${encodeURIComponent(fileName)}`;
+    }
 
     application.paymentRequest.proof = {
       fileUrl,

@@ -189,6 +189,30 @@ export default function PaymentSettings({ paymentSettings, onSaveSettings }) {
         </div>
 
         <div className={styles.formSection}>
+          <h3>Mobile Money</h3>
+          <label className={styles.checkboxRow} style={{ marginBottom: '1rem' }}>
+            <input type="checkbox" checked={formData.methods.mobileMoney.enabled} onChange={(e) => handleChange('mobileMoney', 'enabled', e.target.checked)} />
+            <span>Enable Mobile Money</span>
+          </label>
+          {formData.methods.mobileMoney.enabled && (
+            <div className={styles.grid2}>
+              <label className={styles.formGroup}>
+                Providers
+                <input type="text" className={styles.inputField} value={formData.methods.mobileMoney.providers} onChange={(e) => handleChange('mobileMoney', 'providers', e.target.value)} />
+              </label>
+              <label className={styles.formGroup}>
+                Contact
+                <input type="text" className={styles.inputField} value={formData.methods.mobileMoney.contact} onChange={(e) => handleChange('mobileMoney', 'contact', e.target.value)} />
+              </label>
+              <label className={styles.formGroup} style={{ gridColumn: '1 / -1' }}>
+                Instructions
+                <textarea className={styles.inputField} rows={2} value={formData.methods.mobileMoney.instructions} onChange={(e) => handleChange('mobileMoney', 'instructions', e.target.value)} />
+              </label>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.formSection}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ marginBottom: 0 }}>Cryptocurrency</h3>
             <label className={styles.checkboxRow}>
