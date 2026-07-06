@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+export const dynamic = 'force-dynamic';
 import { readDb, writeDb } from "../../../lib/db.js";
 import { requireAdmin } from "../../../lib/auth.js";
 import { validatePaymentSettings } from "../../../lib/validation.js";

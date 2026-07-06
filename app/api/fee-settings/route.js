@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+export const dynamic = 'force-dynamic';
 import { randomUUID } from "node:crypto";
 import { readDb, writeDb } from "../../../lib/db.js";
 import { requireAdmin } from "../../../lib/auth.js";
