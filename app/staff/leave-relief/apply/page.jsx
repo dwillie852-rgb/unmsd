@@ -98,20 +98,20 @@ export default function Apply() {
           </Link>
         </header>
 
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', inset: 0, zIndex: 100 }}>
-          <div style={{ backgroundColor: 'var(--color-surface)', padding: '3rem', borderRadius: '8px', maxWidth: '500px', width: '90%', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
-            <div style={{ width: '64px', height: '64px', backgroundColor: 'var(--color-brand)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.7)', position: 'fixed', inset: 0, zIndex: 100, padding: '1rem' }}>
+          <div style={{ backgroundColor: '#fff', padding: '2rem 1.5rem', borderRadius: '8px', maxWidth: '500px', width: '100%', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', boxSizing: 'border-box' }}>
+            <div style={{ width: '64px', height: '64px', backgroundColor: '#005bbb', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
               <Send size={32} color="white" />
             </div>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--color-text)' }}>Application Submitted</h2>
-            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#111' }}>Application Submitted</h2>
+            <p style={{ color: '#555', marginBottom: '1.5rem', lineHeight: '1.5' }}>
               Your leave replacement application has been received and is now in the review queue.
             </p>
-            <div style={{ backgroundColor: 'var(--color-surface-2)', padding: '1.5rem', borderRadius: '4px', marginBottom: '2rem' }}>
-              <p style={{ fontSize: '0.875rem', textTransform: 'uppercase', color: 'var(--color-text-secondary)', marginBottom: '0.5rem', fontWeight: 600 }}>Tracking Reference ID</p>
-              <p style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 'bold', color: 'var(--color-brand)' }}>{successRef}</p>
+            <div style={{ backgroundColor: '#f9f9f9', border: '1px solid #ccc', padding: '1.5rem', borderRadius: '4px', marginBottom: '2rem' }}>
+              <p style={{ fontSize: '0.875rem', textTransform: 'uppercase', color: '#555', marginBottom: '0.5rem', fontWeight: 700 }}>Tracking Reference ID</p>
+              <p style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#005bbb', wordBreak: 'break-all' }}>{successRef}</p>
             </div>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button href={`/staff/leave-relief/status?ref=${successRef}`} variant="primary">
                 Track Status
               </Button>
