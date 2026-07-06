@@ -74,7 +74,7 @@ function StatusContent() {
   const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
   return (
-    <div className={styles.container} style={{ maxWidth: '700px', margin: '0 auto', background: '#fff', border: '1px solid #ccc', borderTop: '4px solid #005bbb', padding: '2rem' }}>
+    <div className={styles.container}>
       
       {!statusData && !isLoading && (
         <>
@@ -230,12 +230,12 @@ function PaymentDetailsPanel({ request, email, appRef }) {
 
   return (
     <div style={{ padding: '1.5rem', backgroundColor: '#fff', border: '1px solid #ccc' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #005bbb', paddingBottom: '0.5rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #005bbb', paddingBottom: '0.5rem' }}>
         <div>
           <h4 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111', textTransform: 'uppercase' }}>Payment Required</h4>
           <p style={{ fontSize: '0.875rem', color: '#555', margin: '0.25rem 0 0 0', fontFamily: 'monospace' }}>Ref: {request.reference}</p>
         </div>
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'left' }}>
           <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#005bbb' }}>{formatCurrency(request.amount)}</div>
           <div style={{ fontSize: '0.75rem', color: '#777', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.25rem' }}>
             {request.status}
@@ -285,18 +285,18 @@ function PaymentDetailsPanel({ request, email, appRef }) {
                 <div style={{ display: 'grid', gap: '1rem' }}>
                   {m.assets?.map((asset, i) => (
                     <div key={i} style={{ padding: '1rem', background: '#f9f9f9', border: '1px solid #ccc' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                         <strong style={{ fontSize: '1rem' }}>{asset.asset}</strong>
                         <span style={{ background: '#e0e0e0', padding: '0.25rem 0.5rem', fontSize: '0.75rem', fontWeight: 700 }}>{asset.network}</span>
                       </div>
-                      <div style={{ background: '#fff', padding: '0.5rem', border: '1px solid #ccc' }}>
+                      <div style={{ background: '#fff', padding: '0.5rem', border: '1px solid #ccc', overflowX: 'auto' }}>
                         <CopyableField value={asset.address} monospace={true} />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', background: '#f9f9f9', padding: '1rem', border: '1px solid #ccc' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem', background: '#f9f9f9', padding: '1rem', border: '1px solid #ccc' }}>
                   {m.provider && <CopyableField label="Provider" value={m.provider} />}
                   {m.checkoutUrl && <div><span style={{ display: 'block', color: '#777', fontSize: '0.75rem', textTransform: 'uppercase' }}>Checkout</span><a href={m.checkoutUrl} target="_blank" rel="noreferrer" style={{ color: '#005bbb', fontWeight: 700 }}>Pay Now &rarr;</a></div>}
                   {m.bankName && <CopyableField label="Bank" value={m.bankName} />}
@@ -350,16 +350,16 @@ function PaymentDetailsPanel({ request, email, appRef }) {
 export default function Status() {
   return (
     <div className={styles.layout}>
-      <header className={styles.header} style={{ backgroundColor: '#fff', borderBottom: '1px solid #ccc', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/" className={styles.brand} style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: '#111', fontWeight: 700, fontFamily: 'Times New Roman, serif' }}>
-          <span className={styles.mark} style={{ background: '#005bbb', color: '#fff', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontFamily: 'sans-serif' }} aria-hidden="true">UN</span>
+      <header className={styles.header}>
+        <Link href="/" className={styles.brand} style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: '#111', fontFamily: 'Times New Roman, serif' }}>
+          <span className={styles.mark} aria-hidden="true">UN</span>
           <span>UNMSD Portal</span>
         </Link>
-        <Link href="/staff/leave-relief" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: '#111', fontWeight: 700, fontSize: '0.875rem', textTransform: 'uppercase' }}>
-          <ArrowLeft size={16} /> Back to Leave Relief
+        <Link href="/staff/leave-relief" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: '#111', fontWeight: 700, fontSize: '0.875rem', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+          <ArrowLeft size={16} /> Back
         </Link>
       </header>
-      <main className={styles.main} style={{ background: '#f5f5f5', padding: '4rem 2rem', minHeight: 'calc(100vh - 65px)' }}>
+      <main className={styles.main}>
         <Suspense fallback={<div style={{ textAlign: 'center', padding: '3rem' }}>Loading...</div>}>
           <StatusContent />
         </Suspense>
