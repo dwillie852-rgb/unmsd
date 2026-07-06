@@ -1,0 +1,757 @@
+/* Layout */
+.adminLayout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-surface-2);
+}
+
+.adminSidebar {
+  width: 280px;
+  background-color: var(--color-surface-1);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-base);
+  z-index: 100;
+}
+
+@media (max-width: 768px) {
+  .adminSidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+  }
+  .sidebarOpen .adminSidebar {
+    transform: translateX(0);
+  }
+}
+
+.sidebarHeader {
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: 700;
+}
+
+.mark {
+  background-color: var(--color-brand);
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  font-size: 0.875rem;
+}
+
+.mobileClose {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .mobileClose { display: block; }
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.navLink:hover {
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.navLink.active {
+  background-color: rgba(65, 143, 222, 0.1);
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+.sidebarFooter {
+  padding: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.sessionInfo {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+}
+
+.sessionInfo strong {
+  color: var(--color-text);
+}
+
+.sessionInfo span {
+  color: var(--color-text-tertiary);
+}
+
+.adminMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.adminHeader {
+  height: 64px;
+  padding: 0 var(--space-6);
+  background-color: var(--color-surface-1);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerLeft, .headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.sidebarToggle, .headerBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.sidebarToggle:hover, .headerBtn:hover {
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+@media (min-width: 769px) {
+  .sidebarToggle { display: none; }
+}
+
+.adminStatus {
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+}
+
+.contentArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+  background-color: var(--color-surface-2);
+}
+
+/* Login Screen */
+.loginScreen {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface-2);
+  padding: var(--space-4);
+}
+
+.loginCard {
+  background: var(--color-surface-1);
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.loginCard h2 {
+  margin-bottom: var(--space-2);
+}
+
+.desc {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  text-align: left;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.inputField, .selectField, .textareaField {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-1);
+  transition: border-color var(--transition-fast);
+}
+
+.inputField:focus, .selectField:focus, .textareaField:focus {
+  border-color: var(--color-brand);
+}
+
+.textareaField {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.fullWidthBtn {
+  width: 100%;
+  margin-top: var(--space-4);
+}
+
+.statusInfo {
+  padding: var(--space-3);
+  background-color: rgba(65, 143, 222, 0.1);
+  color: var(--color-brand);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: 0.875rem;
+}
+
+.statusError {
+  padding: var(--space-3);
+  background-color: rgba(220, 53, 69, 0.1);
+  color: var(--color-error);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  font-size: 0.875rem;
+}
+
+.loadingScreen {
+  display: flex;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+/* Dashboard / Queue */
+.dashboardView {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.adminStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.adminStats article {
+  background: var(--color-surface-1);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.adminStats strong {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.adminStats span {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.queueControls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.quickFilters {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.buttonSecondary {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.buttonSecondary:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-dark);
+  color: var(--color-text);
+}
+
+.buttonSecondary.isActive {
+  background: var(--color-text);
+  color: var(--color-surface-1);
+  border-color: var(--color-text);
+}
+
+.detailedFilters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--space-4);
+}
+
+@media (max-width: 1024px) {
+  .detailedFilters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .detailedFilters {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Application Card */
+.applicationList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.applicationCard {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.applicationCardSummary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.applicationCardSummary::-webkit-details-marker {
+  display: none;
+}
+
+.applicationCardHeader {
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.referenceRow {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.statusPill, .urgencyPill {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusRed { background: rgba(220, 53, 69, 0.1); color: var(--color-error); }
+.statusGreen { background: rgba(25, 135, 84, 0.1); color: var(--color-success); }
+.statusTeal { background: rgba(32, 201, 151, 0.1); color: #20c997; }
+.statusGold { background: rgba(255, 193, 7, 0.1); color: #d39e00; }
+
+.urgencyHigh { background: #ffebee; color: #c62828; }
+.urgencyMedium { background: #fff3e0; color: #ef6c00; }
+.urgencyLow { background: #e8f5e9; color: #2e7d32; }
+.urgencyNeutral { background: var(--color-surface-2); color: var(--color-text-secondary); }
+
+.applicationCardHeader h3 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: 1.25rem;
+}
+
+.applicationCardHeader p {
+  margin: 0 0 var(--space-3) 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.applicationBadges {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.applicationSummarySide {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  text-align: right;
+}
+
+.applicationTotal {
+  display: flex;
+  flex-direction: column;
+}
+
+.applicationTotal strong {
+  font-size: 1.25rem;
+}
+
+.applicationTotal span {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.accordionIndicator {
+  color: var(--color-text-tertiary);
+  transition: transform var(--transition-fast);
+  margin-top: 4px;
+}
+
+.applicationCard[open] .accordionIndicator {
+  transform: rotate(180deg);
+}
+
+.progressTrack {
+  height: 4px;
+  background: var(--color-surface-2);
+  width: 100%;
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  background: var(--color-brand);
+  transition: width var(--transition-base);
+}
+
+.progress20 { width: 20%; }
+.progress40 { width: 40%; }
+.progress60 { width: 60%; }
+.progress75 { width: 75%; }
+.progress100 { width: 100%; background: var(--color-success); }
+
+.applicationDetailPanel {
+  padding: var(--space-6);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.applicationMeta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  background: var(--color-surface-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.applicationMeta > div {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+}
+
+.applicationMeta span { color: var(--color-text-tertiary); margin-bottom: 2px; }
+.applicationMeta strong { color: var(--color-text); }
+.applicationMeta small { color: var(--color-text-secondary); }
+
+.opsChecklist {
+  display: flex;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.opsChecklist span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.opsChecklist span.isDone {
+  color: var(--color-success);
+}
+
+.costPanel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-4);
+  border-top: 1px dashed var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.costPanel div {
+  display: flex;
+  flex-direction: column;
+}
+
+.costPanel span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+}
+
+.costPanel strong {
+  font-size: 1.125rem;
+}
+
+.paymentRequestPanel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.paymentRequestPanel.isEmpty {
+  background: var(--color-surface-2);
+  border-style: dashed;
+}
+
+.paymentRequestHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.paymentRequestHeader > div:first-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.paymentRequestHeader span { font-size: 0.75rem; color: var(--color-text-tertiary); text-transform: uppercase; }
+.paymentRequestHeader strong { font-size: 1.125rem; }
+.paymentRequestHeader small { font-size: 0.875rem; color: var(--color-text-secondary); }
+
+.paymentMethodGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.paymentMethodCard {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background: var(--color-surface-2);
+}
+
+.paymentMethodCard h4 { margin: var(--space-2) 0; }
+.paymentMethodCard p { font-size: 0.875rem; margin-bottom: var(--space-4); }
+
+.paymentMethodFields div, .paymentMethodAssets div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--space-2);
+  font-size: 0.875rem;
+}
+
+.paymentMethodFields span, .paymentMethodAssets span {
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+}
+
+.adminControls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.notesField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.familyNote {
+  background: #fff3cd;
+  color: #856404;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.cardActions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--space-12);
+  background: var(--color-surface-1);
+  border: 1px dashed var(--color-border-dark);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+}
+
+.queuePagination {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.buttonPrimary {
+  background: var(--color-text);
+  color: var(--color-surface-1);
+  border-color: var(--color-text);
+}
+
+/* Settings & Audit */
+.settingsView, .auditView {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--color-surface-1);
+  padding: var(--space-8);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.settingsHeader {
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-4);
+}
+
+.settingsStatus {
+  color: var(--color-success);
+  font-weight: 500;
+  margin-top: var(--space-2);
+  min-height: 24px;
+}
+
+.settingsMeta {
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+}
+
+.formSection {
+  margin-bottom: var(--space-8);
+}
+
+.formSection h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.auditList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.auditEvent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.auditIcon {
+  color: var(--color-text-tertiary);
+}
+
+.auditDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.auditDetails strong {
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.auditDetails span {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.auditTime {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}

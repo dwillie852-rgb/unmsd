@@ -1,0 +1,136 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+}
+
+.header {
+  background-color: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.mark {
+  background: var(--color-un-blue);
+  color: #fff;
+  font-weight: 800;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.brand span:last-child {
+  font-weight: 700;
+  color: var(--color-text);
+  font-size: 1.125rem;
+}
+
+.main {
+  flex: 1;
+  padding: var(--space-12) var(--space-4);
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--color-un-blue);
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.desc {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-12);
+  max-width: 600px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.portalCard {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  text-decoration: none;
+  color: inherit;
+}
+
+.portalCard:hover {
+  text-decoration: none;
+  border-color: var(--color-un-blue);
+  box-shadow: var(--shadow-sm);
+}
+
+.iconWrapper {
+  color: var(--color-un-blue);
+  margin-bottom: var(--space-4);
+}
+
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.cardDesc {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin-bottom: var(--space-6);
+  flex: 1;
+}
+
+.cardLink {
+  color: var(--color-un-blue);
+  font-weight: 600;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.portalCard:hover .cardLink {
+  text-decoration: underline;
+}

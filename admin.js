@@ -1,8 +1,4 @@
-const adminMoney = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+
 
 const statusOptions = [
   "RECEIVED",
@@ -31,9 +27,13 @@ const statusProgress = {
 };
 
 const adminAuthForm = document.querySelector("#admin-auth");
-const adminTokenInput = document.querySelector("#admin-token");
+const adminUsernameInput = document.querySelector("#admin-username");
+const adminPasswordInput = document.querySelector("#admin-password");
+const adminLoginScreen = document.querySelector("#admin-login-screen");
 const adminSessionPanel = document.querySelector("#admin-session");
 const adminConsole = document.querySelector("#admin-console");
+const adminSidebarToggle = document.querySelector("#admin-sidebar-toggle");
+const adminNavLinks = document.querySelectorAll("[data-admin-nav]");
 const authStatus = document.querySelector("#auth-status");
 const logoutButton = document.querySelector("#admin-logout");
 const sessionUser = document.querySelector("#session-user");
@@ -42,6 +42,7 @@ const sessionExpiry = document.querySelector("#session-expiry");
 const refreshButton = document.querySelector("#refresh-applications");
 const adminStatus = document.querySelector("#admin-status");
 const applicationList = document.querySelector("#application-list");
+const queuePagination = document.querySelector("#queue-pagination");
 const auditList = document.querySelector("#audit-list");
 const adminStats = document.querySelector("#admin-stats");
 const queueSearch = document.querySelector("#queue-search");
@@ -49,11 +50,25 @@ const statusFilter = document.querySelector("#status-filter");
 const paymentFilter = document.querySelector("#payment-filter");
 const sortFilter = document.querySelector("#sort-filter");
 const quickFilterButtons = document.querySelectorAll("[data-quick-filter]");
+const feeSettingsForm = document.querySelector("#fee-settings-form");
+const feeSettingsStatus = document.querySelector("#fee-settings-status");
+const feeSettingsMeta = document.querySelector("#fee-settings-meta");
+const feeFields = document.querySelectorAll("[data-fee-field]");
 
 let cachedApplications = [];
 let cachedAudit = [];
+let cachedFeeSettings = null;
 let activeQuickFilter = "all";
+let currentQueuePage = 1;
+let queuePageSize = 5;
 let adminSession = null;
+const openApplicationIds = new Set();
+
+const adminMoney = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -207,28 +222,154 @@ function getFilteredApplications() {
   });
 }
 
+function resetQueuePage() {
+  currentQueuePage = 1;
+}
+
+function setFeeSettingsStatus(message, isError = false) {
+  setStatus(feeSettingsStatus, message, isError);
+}
+
+function getPaginatedApplications(filtered) {
+  const start = (currentQueuePage - 1) * queuePageSize;
+  const end = start + queuePageSize;
+  return filtered.slice(start, end);
+}
+
+function renderPagination(totalFiltered) {
+  if (!queuePagination) return;
+  const totalPages = Math.ceil(totalFiltered / queuePageSize) || 1;
+  let html = "";
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<button type="button" class="button ${i === currentQueuePage ? 'button-primary' : 'button-secondary'}" data-page="${i}">${i}</button>`;
+  }
+  queuePagination.innerHTML = html;
+  
+  queuePagination.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      currentQueuePage = Number(e.target.dataset.page);
+      rerenderQueue();
+    });
+  });
+}
+
+
+
+
+
+
+
+function setPathValue(obj, path, value) {
+  const parts = path.split('.');
+  let current = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!current[parts[i]]) current[parts[i]] = {};
+    current = current[parts[i]];
+  }
+  current[parts[parts.length - 1]] = value;
+}
+
+function getPathValue(obj, path) {
+  return path.split('.').reduce((current, key) => current?.[key], obj);
+}
+
+function renderFeeSettings(settings) {
+  cachedFeeSettings = settings;
+  feeFields.forEach((field) => {
+    const value = getPathValue(settings, field.dataset.feeField);
+    if (value !== undefined) {
+      field.value = value;
+    }
+  });
+  if (feeSettingsMeta && settings?.updatedAt) {
+    feeSettingsMeta.innerHTML = `Last updated: ${formatDateTime(settings.updatedAt)}`;
+  }
+}
+
+function collectFeeSettings() {
+  const settings = {};
+  feeFields.forEach((field) => {
+    setPathValue(settings, field.dataset.feeField, Number(field.value));
+  });
+  return settings;
+}
+
+function clearFeeSettingsForm() {
+  cachedFeeSettings = null;
+  feeSettingsForm?.reset();
+  if (feeSettingsMeta) feeSettingsMeta.textContent = "Sign in to load fee table.";
+  setFeeSettingsStatus("");
+}
+
+function setSidebarOpen(isOpen) {
+  document.body.classList.toggle("admin-sidebar-open", isOpen);
+
+  if (!adminSidebarToggle) return;
+  adminSidebarToggle.setAttribute("aria-expanded", String(isOpen));
+  adminSidebarToggle.setAttribute("title", isOpen ? "Close admin menu" : "Open admin menu");
+
+  const icon = adminSidebarToggle.querySelector("i");
+  if (icon) icon.setAttribute("data-lucide", isOpen ? "x" : "panel-left");
+  window.lucide?.createIcons();
+}
+
+function setActiveAdminNav(sectionId = "dashboard") {
+  const hasTarget = Array.from(adminNavLinks).some((link) => link.dataset.adminNav === sectionId);
+  const activeSection = hasTarget ? sectionId : "dashboard";
+
+  adminNavLinks.forEach((link) => {
+    const isActive = link.dataset.adminNav === activeSection;
+    link.classList.toggle("is-active", isActive);
+    if (isActive) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+function syncActiveAdminNavFromHash() {
+  const sectionId = window.location.hash.replace("#", "") || "dashboard";
+  setActiveAdminNav(sectionId);
+}
+
 function showSignedOut(message = "Sign in to continue.", isError = false) {
   adminSession = null;
-  adminAuthForm.hidden = false;
-  adminSessionPanel.hidden = true;
-  adminConsole.hidden = true;
+  document.body.classList.remove("admin-authenticated", "admin-sidebar-open");
+  if (adminLoginScreen) adminLoginScreen.hidden = false;
+  if (adminAuthForm) adminAuthForm.hidden = false;
+  if (adminSessionPanel) adminSessionPanel.hidden = true;
+  if (adminConsole) adminConsole.hidden = true;
+  if (refreshButton) refreshButton.hidden = true;
+  if (logoutButton) logoutButton.hidden = true;
   cachedApplications = [];
   cachedAudit = [];
+  resetQueuePage();
+  clearFeeSettingsForm();
+  openApplicationIds.clear();
   applicationList.innerHTML = `<div class="empty-state">Sign in to load the operations queue.</div>`;
+  if (queuePagination) queuePagination.innerHTML = "";
   auditList.innerHTML = `<div class="empty-state">Audit events will appear after authentication.</div>`;
   setAdminStatus("");
   setAuthStatus(message, isError);
+  setSidebarOpen(false);
+  syncActiveAdminNavFromHash();
 }
 
 function showSignedIn(session) {
   adminSession = session;
-  adminAuthForm.hidden = true;
-  adminSessionPanel.hidden = false;
-  adminConsole.hidden = false;
+  document.body.classList.add("admin-authenticated");
+  if (adminLoginScreen) adminLoginScreen.hidden = true;
+  if (adminAuthForm) adminAuthForm.hidden = true;
+  if (adminSessionPanel) adminSessionPanel.hidden = false;
+  if (adminConsole) adminConsole.hidden = false;
+  if (refreshButton) refreshButton.hidden = false;
+  if (logoutButton) logoutButton.hidden = false;
   sessionUser.textContent = session.admin?.name || "Operations admin";
   sessionRole.textContent = session.admin?.role || "Leave relief operations";
   sessionExpiry.textContent = formatDateTime(session.expiresAt);
   setAuthStatus("Secure session active.");
+  syncActiveAdminNavFromHash();
 }
 
 async function readJsonResponse(response) {
@@ -267,12 +408,12 @@ async function adminFetch(path, options = {}) {
   }
 }
 
-async function signIn(token) {
+async function signIn(username, password) {
   const response = await fetch("/api/admin/login", {
     method: "POST",
     credentials: "same-origin",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({ username, password }),
   });
 
   return readJsonResponse(response);
@@ -307,7 +448,7 @@ function renderStats(applications) {
       <span>Travel ready</span>
     </article>
     <article>
-      <strong>${adminMoney.format(paidOrEstimated)}</strong>
+      <strong>${formatMoney(paidOrEstimated)}</strong>
       <span>Paid or estimated fees</span>
     </article>
   `;
@@ -325,6 +466,88 @@ function renderChecklist(application) {
       <span class="${paymentDone ? "is-done" : ""}"><i data-lucide="${paymentDone ? "check" : "circle"}"></i> Payment</span>
       <span class="${travelDone ? "is-done" : ""}"><i data-lucide="${travelDone ? "check" : "circle"}"></i> Movement</span>
       <span class="${closedDone ? "is-done" : ""}"><i data-lucide="${closedDone ? "check" : "circle"}"></i> Handover</span>
+    </div>
+  `;
+}
+
+function methodField(label, value) {
+  if (!value) return "";
+  return `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+}
+
+function renderPaymentMethod(method) {
+  const details =
+    method.key === "crypto"
+      ? `
+        <div class="payment-method-assets">
+          ${(method.assets || [])
+            .map(
+              (asset) => `
+                <div>
+                  <span>${escapeHtml(asset.asset)} / ${escapeHtml(asset.network)}</span>
+                  <strong>${escapeHtml(asset.address)}</strong>
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
+      `
+      : `
+        <div class="payment-method-fields">
+          ${methodField("Provider", method.provider)}
+          ${methodField("Checkout", method.checkoutUrl)}
+          ${methodField("Account", method.accountName)}
+          ${methodField("Bank", method.bankName)}
+          ${methodField("IBAN", method.iban)}
+          ${methodField("SWIFT", method.swift)}
+          ${methodField("Mobile routes", method.providers)}
+          ${methodField("Contact", method.contact)}
+        </div>
+      `;
+
+  return `
+    <article class="payment-method-card">
+      <div>
+        <span class="status status-teal">${escapeHtml(method.key)}</span>
+        <h4>${escapeHtml(method.label)}</h4>
+        <p>${escapeHtml(method.instructions || method.settlement || "")}</p>
+      </div>
+      ${details}
+    </article>
+  `;
+}
+
+function renderPaymentRequest(application) {
+  const request = application.paymentRequest;
+  if (!request) {
+    return `
+      <div class="payment-request-panel is-empty">
+        <div>
+          <span>Payment request</span>
+          <strong>No payment request issued</strong>
+        </div>
+        <p>Issue a request after coverage review so the family can choose card, bank, mobile money, or crypto settlement.</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="payment-request-panel">
+      <div class="payment-request-header">
+        <div>
+          <span>Payment request</span>
+          <strong>${escapeHtml(request.reference)}</strong>
+          <small>${escapeHtml(request.status)} | Expires ${formatDate(request.expiresAt)}</small>
+        </div>
+        <div class="application-total">
+          <strong>${formatMoney(request.amount)}</strong>
+          <span>${escapeHtml(request.currency)}</span>
+        </div>
+      </div>
+      <p>${escapeHtml(request.settlementNote || "")}</p>
+      <div class="payment-method-grid">
+        ${(request.methods || []).map(renderPaymentMethod).join("")}
+      </div>
     </div>
   `;
 }
@@ -347,91 +570,110 @@ function renderApplications(applications, totalApplications = applications.lengt
       const leaveWindow = `${application.days} days from ${formatDate(application.startDate)}`;
 
       return `
-        <article class="application-card" data-application-id="${application.id}">
-          <div class="application-card-header">
-            <div>
-              <div class="reference-row">
-                <span class="status status-red">${escapeHtml(application.reference)}</span>
-                <span class="urgency-pill ${urgency.className}">${escapeHtml(urgency.label)}</span>
+        <details class="application-card" data-application-id="${application.id}" ${openApplicationIds.has(application.id) ? "open" : ""}>
+          <summary class="application-card-summary">
+            <div class="application-card-header">
+              <div>
+                <div class="reference-row">
+                  <span class="status status-red">${escapeHtml(application.reference)}</span>
+                  <span class="urgency-pill ${urgency.className}">${escapeHtml(urgency.label)}</span>
+                </div>
+                <h3>${escapeHtml(application.doctor)}</h3>
+                <p>${escapeHtml(application.roleLabel)} | ${escapeHtml(application.station)}</p>
+                <div class="application-badges">
+                  <span class="status ${statusClass(application.status)}">${formatStatus(application.status)}</span>
+                  <span class="status ${paymentClass(application.paymentStatus)}">${formatStatus(application.paymentStatus)}</span>
+                </div>
               </div>
-              <h3>${escapeHtml(application.doctor)}</h3>
-              <p>${escapeHtml(application.roleLabel)} | ${escapeHtml(application.station)}</p>
-              <div class="application-badges">
-                <span class="status ${statusClass(application.status)}">${formatStatus(application.status)}</span>
-                <span class="status ${paymentClass(application.paymentStatus)}">${formatStatus(application.paymentStatus)}</span>
+              <div class="application-summary-side">
+                <div class="application-total">
+                  <strong>${formatMoney(application.costs.total)}</strong>
+                  <span>${escapeHtml(leaveWindow)}</span>
+                </div>
+                <span class="accordion-indicator" aria-hidden="true">
+                  <i data-lucide="chevron-down"></i>
+                </span>
               </div>
             </div>
-            <div class="application-total">
-              <strong>${adminMoney.format(application.costs.total)}</strong>
-              <span>${escapeHtml(leaveWindow)}</span>
+            <div class="progress-track" aria-label="Application progress">
+              <span class="progress-fill ${progressClass(application.status)}"></span>
             </div>
-          </div>
+          </summary>
 
-          <div class="progress-track" aria-label="Application progress">
-            <span class="progress-fill ${progressClass(application.status)}"></span>
-          </div>
-
-          <div class="application-meta">
-            <div>
-              <span>Applicant</span>
-              <strong>${escapeHtml(application.applicant)}</strong>
-              <small>${escapeHtml(application.email)}</small>
+          <div class="application-detail-panel">
+            <div class="application-meta">
+              <div>
+                <span>Applicant</span>
+                <strong>${escapeHtml(application.applicant)}</strong>
+                <small>${escapeHtml(application.email)}</small>
+                <small>Doctor: ${escapeHtml(application.doctorEmail || 'N/A')}</small>
+              </div>
+              <div>
+                <span>Field pressure</span>
+                <strong>${escapeHtml(application.zoneLabel)}</strong>
+                <small>${application.travel ? "Travel coordination included" : "No travel coordination"}</small>
+              </div>
+              <div>
+                <span>Submitted</span>
+                <strong>${escapeHtml(submitted)}</strong>
+                <small>Updated ${formatDateTime(application.updatedAt)}</small>
+              </div>
+              <div>
+                <span>Coverage estimate</span>
+                <strong>${formatMoney(application.costs.coverage)}</strong>
+                <small>Reserve ${formatMoney(application.costs.reserve)}</small>
+              </div>
             </div>
-            <div>
-              <span>Field pressure</span>
-              <strong>${escapeHtml(application.zoneLabel)}</strong>
-              <small>${application.travel ? "Travel coordination included" : "No travel coordination"}</small>
-            </div>
-            <div>
-              <span>Submitted</span>
-              <strong>${escapeHtml(submitted)}</strong>
-              <small>Updated ${formatDateTime(application.updatedAt)}</small>
-            </div>
-            <div>
-              <span>Coverage estimate</span>
-              <strong>${adminMoney.format(application.costs.coverage)}</strong>
-              <small>Reserve ${adminMoney.format(application.costs.reserve)}</small>
-            </div>
-          </div>
 
-          ${renderChecklist(application)}
+            ${renderChecklist(application)}
 
-          <div class="cost-panel compact-costs">
-            <div><span>Coverage</span><strong>${adminMoney.format(application.costs.coverage)}</strong></div>
-            <div><span>Handover</span><strong>${adminMoney.format(application.costs.handover)}</strong></div>
-            <div><span>Travel</span><strong>${adminMoney.format(application.costs.travelCoordination)}</strong></div>
-            <div><span>Reserve</span><strong>${adminMoney.format(application.costs.reserve)}</strong></div>
-          </div>
+            <div class="cost-panel compact-costs">
+              <div><span>Coverage</span><strong>${formatMoney(application.costs.coverage)}</strong></div>
+              <div><span>Handover</span><strong>${formatMoney(application.costs.handover)}</strong></div>
+              <div><span>Travel</span><strong>${formatMoney(application.costs.travelCoordination)}</strong></div>
+              <div><span>Reserve</span><strong>${formatMoney(application.costs.reserve)}</strong></div>
+            </div>
 
-          <div class="admin-controls">
-            <label>
-              Review status
-              <select data-field="status">${optionHtml(statusOptions, application.status)}</select>
+            ${renderPaymentRequest(application)}
+
+            <div class="admin-controls">
+              <label>
+                Review status
+                <select data-field="status">${optionHtml(statusOptions, application.status)}</select>
+              </label>
+              <label>
+                Payment status
+                <select data-field="paymentStatus">${optionHtml(paymentOptions, application.paymentStatus)}</select>
+              </label>
+            </div>
+
+            <label class="notes-field">
+              Operations notes
+              <textarea data-field="adminNotes" rows="3" maxlength="1600" placeholder="Coverage match, payment notes, handover risks">${escapeHtml(application.adminNotes)}</textarea>
             </label>
-            <label>
-              Payment status
-              <select data-field="paymentStatus">${optionHtml(paymentOptions, application.paymentStatus)}</select>
-            </label>
+
+            ${
+              application.familyNotes
+                ? `<details class="family-note"><summary>Family context</summary><p>${escapeHtml(application.familyNotes)}</p></details>`
+                : ""
+            }
+
+            <div class="card-actions">
+              <button class="button button-primary save-application" type="button">
+                <i data-lucide="save"></i>
+                Save review
+              </button>
+              <button class="button button-primary approve-invoice" type="button" ${application.status === "APPROVED_FOR_TRAVEL" ? "disabled" : ""}>
+                <i data-lucide="zap"></i>
+                Approve & Invoice
+              </button>
+              <button class="button button-light button-quiet issue-payment-request" type="button">
+                <i data-lucide="receipt-text"></i>
+                ${application.paymentRequest ? "Refresh payment request" : "Issue payment request"}
+              </button>
+            </div>
           </div>
-
-          <label class="notes-field">
-            Operations notes
-            <textarea data-field="adminNotes" rows="3" maxlength="1600" placeholder="Coverage match, payment notes, handover risks">${escapeHtml(application.adminNotes)}</textarea>
-          </label>
-
-          ${
-            application.familyNotes
-              ? `<details class="family-note"><summary>Family context</summary><p>${escapeHtml(application.familyNotes)}</p></details>`
-              : ""
-          }
-
-          <div class="card-actions">
-            <button class="button button-primary save-application" type="button">
-              <i data-lucide="save"></i>
-              Save review
-            </button>
-          </div>
-        </article>
+        </details>
       `;
     })
     .join("");
@@ -465,8 +707,12 @@ function renderAudit(audit) {
 }
 
 function rerenderQueue() {
+  const filteredApplications = getFilteredApplications();
+  const paginatedApplications = getPaginatedApplications(filteredApplications);
+
   renderStats(cachedApplications);
-  renderApplications(getFilteredApplications(), cachedApplications.length);
+  renderApplications(paginatedApplications, cachedApplications.length);
+  renderPagination(filteredApplications.length);
   renderAudit(cachedAudit);
 }
 
@@ -479,12 +725,21 @@ async function loadApplications() {
   setAdminStatus(`Loaded ${result.applications.length} application${result.applications.length === 1 ? "" : "s"}.`);
 }
 
+async function loadFeeSettings() {
+  setFeeSettingsStatus("Loading fee table...");
+  const result = await adminFetch("/api/fee-settings");
+  renderFeeSettings(result.feeSettings);
+  setFeeSettingsStatus("Fee table loaded.");
+}
+
 adminAuthForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const submitButton = adminAuthForm.querySelector('button[type="submit"]');
-  const token = adminTokenInput.value.trim();
-  if (!token) {
-    setAuthStatus("Enter the admin token.", true);
+  const username = adminUsernameInput.value.trim();
+  const password = adminPasswordInput.value.trim();
+  
+  if (!username || !password) {
+    setAuthStatus("Enter your username and password.", true);
     return;
   }
 
@@ -494,11 +749,12 @@ adminAuthForm?.addEventListener("submit", async (event) => {
   setAuthStatus("Checking credentials...");
 
   try {
-    const session = await signIn(token);
-    adminTokenInput.value = "";
+    const session = await signIn(username, password);
+    adminUsernameInput.value = "";
+    adminPasswordInput.value = "";
     localStorage.removeItem("dwb-admin-token");
     showSignedIn(session);
-    await loadApplications();
+    await Promise.all([loadApplications(), loadFeeSettings()]);
   } catch (error) {
     showSignedOut(error.message, true);
   } finally {
@@ -508,9 +764,14 @@ adminAuthForm?.addEventListener("submit", async (event) => {
   }
 });
 
+function resetAndRerenderQueue() {
+  resetQueuePage();
+  rerenderQueue();
+}
+
 [queueSearch, statusFilter, paymentFilter, sortFilter].forEach((control) => {
-  control?.addEventListener("input", rerenderQueue);
-  control?.addEventListener("change", rerenderQueue);
+  control?.addEventListener("input", resetAndRerenderQueue);
+  control?.addEventListener("change", resetAndRerenderQueue);
 });
 
 quickFilterButtons.forEach((button) => {
@@ -521,8 +782,55 @@ quickFilterButtons.forEach((button) => {
       item.classList.toggle("active", isActive);
       item.setAttribute("aria-selected", String(isActive));
     });
-    rerenderQueue();
+    resetAndRerenderQueue();
   });
+});
+
+adminSidebarToggle?.addEventListener("click", (event) => {
+  event.stopPropagation();
+  setSidebarOpen(!document.body.classList.contains("admin-sidebar-open"));
+});
+
+adminNavLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    setActiveAdminNav(link.dataset.adminNav);
+    setSidebarOpen(false);
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (!document.body.classList.contains("admin-sidebar-open")) return;
+  if (event.target.closest("#admin-sidebar") || event.target.closest("#admin-sidebar-toggle")) return;
+  setSidebarOpen(false);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") setSidebarOpen(false);
+});
+
+window.addEventListener("hashchange", syncActiveAdminNavFromHash);
+
+queuePagination?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-page-action]");
+  if (!button) return;
+
+  const action = button.dataset.pageAction;
+  if (action === "previous") {
+    currentQueuePage -= 1;
+  } else if (action === "next") {
+    currentQueuePage += 1;
+  }
+
+  rerenderQueue();
+});
+
+queuePagination?.addEventListener("change", (event) => {
+  const select = event.target.closest("#queue-page-size");
+  if (!select) return;
+
+  queuePageSize = Number(select.value);
+  resetQueuePage();
+  rerenderQueue();
 });
 
 refreshButton?.addEventListener("click", async () => {
@@ -533,6 +841,40 @@ refreshButton?.addEventListener("click", async () => {
     setAdminStatus(error.message, true);
   } finally {
     refreshButton.disabled = false;
+  }
+});
+
+feeSettingsForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!feeSettingsForm.checkValidity()) {
+    feeSettingsForm.reportValidity();
+    return;
+  }
+
+  const button = feeSettingsForm.querySelector('button[type="submit"]');
+  button.disabled = true;
+  button.dataset.originalHtml = button.innerHTML;
+  button.textContent = "Saving...";
+  setFeeSettingsStatus("Saving fee table...");
+
+  try {
+    const result = await adminFetch("/api/fee-settings", {
+      method: "PATCH",
+      body: JSON.stringify({ feeSettings: collectFeeSettings() }),
+    });
+    renderFeeSettings(result.feeSettings);
+    if (result.audit) {
+      cachedAudit = result.audit;
+      renderAudit(cachedAudit);
+    }
+    setFeeSettingsStatus("Fee table saved. New applications will use these values.");
+  } catch (error) {
+    setFeeSettingsStatus(error.message, true);
+  } finally {
+    button.disabled = false;
+    button.innerHTML = button.dataset.originalHtml || '<i data-lucide="save"></i> Save fee table';
+    window.lucide?.createIcons();
   }
 });
 
@@ -552,6 +894,64 @@ logoutButton?.addEventListener("click", async () => {
 });
 
 applicationList?.addEventListener("click", async (event) => {
+  const paymentButton = event.target.closest(".issue-payment-request");
+  if (paymentButton) {
+    const card = paymentButton.closest(".application-card");
+    const id = card.dataset.applicationId;
+    paymentButton.disabled = true;
+    paymentButton.dataset.originalHtml = paymentButton.innerHTML;
+    paymentButton.textContent = "Issuing...";
+    openApplicationIds.add(id);
+
+    try {
+      await adminFetch(`/api/leave-applications/${id}/payment-request`, {
+        method: "POST",
+      });
+      await loadApplications();
+      setAdminStatus("Payment request issued with card, bank, mobile money, and crypto rails.");
+    } catch (error) {
+      setAdminStatus(error.message, true);
+    } finally {
+      paymentButton.disabled = false;
+      paymentButton.innerHTML = paymentButton.dataset.originalHtml || '<i data-lucide="receipt-text"></i> Issue payment request';
+      window.lucide?.createIcons();
+    }
+    return;
+  }
+
+  const approveInvoiceButton = event.target.closest(".approve-invoice");
+  if (approveInvoiceButton) {
+    const card = approveInvoiceButton.closest(".application-card");
+    const id = card.dataset.applicationId;
+    approveInvoiceButton.disabled = true;
+    approveInvoiceButton.dataset.originalHtml = approveInvoiceButton.innerHTML;
+    approveInvoiceButton.textContent = "Approving...";
+    openApplicationIds.add(id);
+
+    try {
+      await adminFetch(`/api/leave-applications/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: "PAYMENT_PENDING",
+          paymentStatus: "INVOICE_SENT",
+          adminNotes: card.querySelector('[data-field="adminNotes"]').value,
+        }),
+      });
+      await adminFetch(`/api/leave-applications/${id}/payment-request`, {
+        method: "POST",
+      });
+      await loadApplications();
+      setAdminStatus("Application approved and invoice issued.");
+    } catch (error) {
+      setAdminStatus(error.message, true);
+    } finally {
+      approveInvoiceButton.disabled = false;
+      approveInvoiceButton.innerHTML = approveInvoiceButton.dataset.originalHtml || '<i data-lucide="zap"></i> Approve & Invoice';
+      window.lucide?.createIcons();
+    }
+    return;
+  }
+
   const button = event.target.closest(".save-application");
   if (!button) return;
 
@@ -583,6 +983,21 @@ applicationList?.addEventListener("click", async (event) => {
   }
 });
 
+applicationList?.addEventListener(
+  "toggle",
+  (event) => {
+    const card = event.target.closest(".application-card");
+    if (!card || !applicationList.contains(card)) return;
+
+    if (card.open) {
+      openApplicationIds.add(card.dataset.applicationId);
+    } else {
+      openApplicationIds.delete(card.dataset.applicationId);
+    }
+  },
+  true,
+);
+
 window.addEventListener("DOMContentLoaded", async () => {
   localStorage.removeItem("dwb-admin-token");
   showSignedOut("Checking for an active session...");
@@ -595,7 +1010,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
     showSignedIn(session);
-    await loadApplications();
+    await Promise.all([loadApplications(), loadFeeSettings()]);
   } catch (error) {
     showSignedOut(error.message, true);
   } finally {

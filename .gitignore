@@ -1,2 +1,30 @@
+# Dependencies
+node_modules/
+
+# Next.js build
+.next/
+out/
+
+# Application data (DB + uploads)
 data/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.production.local
+
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Legacy (pre-Next.js standalone server — no longer used)
+# src/ and server.mjs remain in repo as reference but are not part of the Next.js app

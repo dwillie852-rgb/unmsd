@@ -1,0 +1,273 @@
+.main {
+  display: flex;
+  flex-direction: column;
+}
+
+/* UN Hero Section */
+.hero {
+  position: relative;
+  background-color: #005bbb; /* UN Blue */
+  background-image: url('/un_mission_hero.png');
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  padding: 8rem 2rem;
+  text-align: left;
+  border-bottom: 8px solid #005bbb; /* Strict bottom border */
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,91,187,0.95) 0%, rgba(0,91,187,0.7) 50%, transparent 100%);
+  z-index: 1;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #f8c400; /* UN Yellow for contrast/alert */
+}
+
+.heroTitle {
+  font-family: 'Times New Roman', Times, serif; /* Authoritative serif */
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1.05;
+  font-weight: 400; /* Flat, non-bold for editorial look */
+  color: #fff;
+  margin-bottom: 0.5rem;
+  max-width: 800px;
+}
+
+.heroDesc {
+  font-size: clamp(1.125rem, 2vw, 1.25rem);
+  color: #fff;
+  max-width: 700px;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.heroActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  background-color: #f8c400;
+  color: #000;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: none;
+  border-radius: 0; /* Strict square corners */
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.primaryBtn:hover {
+  background-color: #d4a700;
+}
+
+.outlineBtn {
+  background-color: transparent;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid #fff;
+  border-radius: 0;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.outlineBtn:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+/* Formal Advisory Ticker */
+.advisorySection {
+  background-color: #f2f2f2;
+  border-bottom: 1px solid #dcdcdc;
+}
+
+.advisoryBanner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  font-size: 0.875rem;
+  color: #333;
+}
+
+.advisoryLabel {
+  background-color: #d9534f;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+.advisoryText a {
+  color: #005bbb;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.advisoryText a:hover {
+  text-decoration: underline;
+}
+
+/* Editorial Sections */
+.section {
+  padding: 4rem 2rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.sectionAlt {
+  padding: 4rem 2rem;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sectionHeading {
+  margin-bottom: 3rem;
+  max-width: 900px;
+}
+
+.sectionHeading h2 {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 400;
+  color: #111;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #005bbb;
+  padding-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.sectionHeading p {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #444;
+}
+
+/* Flat Grid Layouts */
+.editorialGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+}
+
+@media (min-width: 768px) {
+  .editorialGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.editorialBlock {
+  border-top: 4px solid #005bbb;
+  padding-top: 1.5rem;
+}
+
+.editorialTitle {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #005bbb;
+  margin-bottom: 0.75rem;
+}
+
+.editorialDesc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.editorialLink {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #005bbb;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.editorialLink:hover {
+  text-decoration: underline;
+}
+
+/* Official Stats Table */
+.statsTable {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+}
+
+@media (min-width: 768px) {
+  .statsTable {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.statCell {
+  padding: 2rem;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  background-color: #fff;
+}
+
+.statNum {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 3.5rem;
+  font-weight: 400;
+  color: #005bbb;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #111;
+  margin-bottom: 0.5rem;
+}
+
+.statDesc {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #555;
+}

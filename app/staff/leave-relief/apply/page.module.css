@@ -1,0 +1,246 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-bottom: 2px solid #ccc;
+  background-color: #fff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: 700;
+  color: #111;
+  text-decoration: none;
+}
+
+.mark {
+  background-color: #005bbb;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.875rem;
+  font-family: sans-serif;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4rem 2rem;
+}
+
+.formContainer {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: 4px solid #005bbb;
+  width: 100%;
+  max-width: 1000px;
+}
+
+@media (min-width: 768px) {
+  .formContainer {
+    flex-direction: row;
+  }
+}
+
+.sidebar {
+  background-color: #f9f9f9;
+  padding: 2rem;
+  border-right: 1px solid #ccc;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    width: 300px;
+  }
+}
+
+.sidebarHeader {
+  margin-bottom: 2rem;
+}
+
+.eyebrow {
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.sidebarHeader h2 {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #111;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #e0e0e0;
+  color: #333;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-top: 1px solid #ccc;
+  padding-top: 1rem;
+}
+
+.stepDot {
+  display: flex;
+  align-items: center;
+  color: #999;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+}
+
+.stepDotActive {
+  color: #005bbb;
+}
+
+.costPanel {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.costRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.costRow strong {
+  color: #111;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid #ccc;
+  font-weight: 700;
+  color: #005bbb;
+  font-size: 1.125rem;
+}
+
+.content {
+  padding: 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content h3 {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #111;
+}
+
+.formNote {
+  color: #555;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.formGrid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+}
+
+.input {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #111;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #005bbb;
+  box-shadow: 0 0 0 1px #005bbb;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #ccc;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  cursor: pointer;
+  background: #f9f9f9;
+  padding: 1rem;
+  border: 1px solid #ccc;
+}
+
+.checkboxRow input[type="checkbox"] {
+  margin-top: 0.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: #005bbb;
+}
+
+.checkboxRow span {
+  font-size: 0.875rem;
+  color: #333;
+  line-height: 1.5;
+}
