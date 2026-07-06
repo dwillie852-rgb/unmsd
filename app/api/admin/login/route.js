@@ -26,11 +26,11 @@ export async function POST(req) {
       return NextResponse.json({ error: "Admin credentials are invalid." }, { status: 401 });
     }
 
-    const session = createAdminSession(admin);
+    const { session, token } = createAdminSession(admin);
     clearRateLimit(req, "admin-login");
     
     const response = NextResponse.json(sessionPayload(session));
-    response.headers.set("Set-Cookie", sessionCookie(req, session.id, Math.floor(SESSION_TTL_MS / 1000)));
+    response.headers.set("Set-Cookie", sessionCookie(req, token, Math.floor(SESSION_TTL_MS / 1000)));
     return response;
   } catch (error) {
     return NextResponse.json({ error: error.message || "Sign in failed." }, { status: 400 });
