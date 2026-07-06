@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { readDb } from "../../../../lib/db.js";
 import { requireAdmin } from "../../../../lib/auth.js";
+import { DATA_DIR } from "../../../../lib/config.js";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -24,7 +25,7 @@ export async function GET(req) {
     return NextResponse.json({ error: "File not found or not associated with any application." }, { status: 404 });
   }
 
-  const uploadDir = path.join(process.cwd(), "data", "uploads");
+  const uploadDir = path.join(DATA_DIR, "uploads");
   const filePath = path.join(uploadDir, fileName);
 
   try {

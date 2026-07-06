@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { readDb, writeDb } from "../../../../lib/db.js";
 import { consumeRateLimit, safeEquals } from "../../../../lib/auth.js";
 import { asTrimmedString } from "../../../../lib/validation.js";
+import { DATA_DIR } from "../../../../lib/config.js";
 import { randomUUID } from "node:crypto";
 import { writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
@@ -60,7 +61,7 @@ export async function POST(req) {
     if (file.type === "application/pdf") ext = ".pdf";
     
     const fileName = `${application.reference}-proof-${randomUUID()}${ext}`;
-    const uploadDir = path.join(process.cwd(), "data", "uploads");
+    const uploadDir = path.join(DATA_DIR, "uploads");
     await mkdir(uploadDir, { recursive: true });
     
     const filePath = path.join(uploadDir, fileName);
