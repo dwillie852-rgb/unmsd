@@ -41,6 +41,10 @@ export async function PATCH(req, { params }) {
         if (nextPaymentStatus === "PAID") {
           application.paymentRequest.status = "PAID";
           application.paymentRequest.paidAt = new Date().toISOString();
+          
+          if (!nextStatus && application.status === "PAYMENT_PENDING") {
+            application.status = "COVERAGE_MATCHED";
+          }
         } else if (nextPaymentStatus === "REFUNDED") {
           application.paymentRequest.status = "REFUNDED";
         } else if (nextPaymentStatus === "WAIVED") {

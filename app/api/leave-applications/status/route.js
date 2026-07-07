@@ -45,7 +45,7 @@ function statusNextStep(status, paymentStatus) {
   if (status === "CLOSED") return "This leave relief request is closed.";
   if (status === "APPROVED_FOR_TRAVEL") return "Leave is cleared for travel. Follow the movement and handover instructions from operations.";
   if (paymentStatus === "INVOICE_SENT") return "Complete the invoice payment so operations can finalize replacement cover.";
-  if (paymentStatus === "PAID" && status === "COVERAGE_MATCHED") return "Replacement cover is matched. Operations is finalizing movement, handover, and travel clearance.";
+  if (paymentStatus === "PAID" && (status === "COVERAGE_MATCHED" || status === "PAYMENT_PENDING")) return "Payment received. Operations is finalizing movement, handover, and travel clearance.";
   if (status === "PAYMENT_PENDING") return "Coverage planning is underway and payment confirmation is needed before travel clearance.";
   if (status === "COVERAGE_MATCHED") return "A replacement match is available. Operations is confirming payment and handover readiness.";
   if (status === "COVERAGE_REVIEW") return "The mission desk is checking caseload, safety, replacement fit, and handover requirements.";
