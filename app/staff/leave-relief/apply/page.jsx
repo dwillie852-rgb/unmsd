@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, ArrowRight, ArrowLeft, Send } from 'lucide-react';
+import { Lock, ArrowRight, ArrowLeft, Send, Copy } from 'lucide-react';
 import Button from '@/components/Button';
 import styles from './page.module.css';
 
@@ -109,7 +109,23 @@ export default function Apply() {
             </p>
             <div style={{ backgroundColor: '#f9f9f9', border: '1px solid #ccc', padding: '1.5rem', borderRadius: '4px', marginBottom: '2rem' }}>
               <p style={{ fontSize: '0.875rem', textTransform: 'uppercase', color: '#555', marginBottom: '0.5rem', fontWeight: 700 }}>Tracking Reference ID</p>
-              <p style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#005bbb', wordBreak: 'break-all' }}>{successRef}</p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+                <p style={{ fontSize: '1.5rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#005bbb', wordBreak: 'break-all', margin: 0 }}>{successRef}</p>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(successRef);
+                    const btn = document.getElementById('copy-btn-icon');
+                    if (btn) {
+                      btn.style.stroke = '#28a745';
+                      setTimeout(() => btn.style.stroke = 'currentColor', 2000);
+                    }
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', color: '#555' }}
+                  title="Copy to clipboard"
+                >
+                  <Copy id="copy-btn-icon" size={20} />
+                </button>
+              </div>
             </div>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button href={`/staff/leave-relief/status?ref=${successRef}`} variant="primary">
